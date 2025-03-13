@@ -9,16 +9,16 @@ a.length = 1
 print(a.input_z(3E9,0.05,50))
 print(a.input_z(1E9,0.01,0))
 
-file_path = r"T:\FQTTXGEN3\AC0009\calibration\TransmitCal-00-60-75-70-11-af_new.csv"
+file_path = r"C:\Users\miles.dawkins\Downloads\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
 file_path = file_path.replace("\\", "/")
 
-csv = mt.misc.readCSV(file_path)
-rows = int(len(csv[0]))
-for i in csv:
-    print(i[1])
-#trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
+#file_dat = mt.misc.spreadsheet(file_path)
+#print(file_dat.col_2_list(4))
 
-"""
+
+trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
+
+
 #print("type :", trans_s2p.linmag[1][0])
 figure2, ay = plot.subplots()
 ay.plot(trans_s2p.frequencies,trans_s2p.dbmag[1][1])
@@ -32,11 +32,10 @@ ax.grid()
 ax.set_aspect('equal')
 
 point = 0
-for xy in zip(trans_s2p.real[1][0], trans_s2p.imag[1][0]):  
+for xy in zip(trans_s2p.real[0][0], trans_s2p.imag[0][0]):  
     if point%10 == 0:
         ax.annotate('(%s)' % trans_s2p.frequencies[point], xy=xy, textcoords='data') 
     point = point + 1
 
 plot.show()
 
-"""
