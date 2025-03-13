@@ -9,11 +9,16 @@ a.length = 1
 print(a.input_z(3E9,0.05,50))
 print(a.input_z(1E9,0.01,0))
 
-file_path = r"C:\Users\Miles\Downloads\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
+file_path = r"T:\FQTTXGEN3\AC0009\calibration\TransmitCal-00-60-75-70-11-af_new.csv"
 file_path = file_path.replace("\\", "/")
-trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
 
+csv = mt.misc.readCSV(file_path)
+rows = int(len(csv[0]))
+for i in csv:
+    print(i[1])
+#trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
 
+"""
 #print("type :", trans_s2p.linmag[1][0])
 figure2, ay = plot.subplots()
 ay.plot(trans_s2p.frequencies,trans_s2p.dbmag[1][1])
@@ -34,3 +39,4 @@ for xy in zip(trans_s2p.real[1][0], trans_s2p.imag[1][0]):
 
 plot.show()
 
+"""
