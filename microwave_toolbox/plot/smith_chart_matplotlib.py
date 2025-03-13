@@ -48,8 +48,9 @@ class smith_chart():
         #Add the reactance circles
         for val in reactances:
             # must plot both positive and negative reactances
-            ax.add_patch(patches.Circle((1,1/val), 1/val, edgecolor='k', facecolor='none'))
-            ax.add_patch(patches.Circle((1,1/(-val)), 1/(-val), edgecolor='k', facecolor='none'))
+            if val != 0:
+                ax.add_patch(patches.Circle((1,1/val), 1/val, edgecolor='k', facecolor='none'))
+                ax.add_patch(patches.Circle((1,1/(-val)), 1/(-val), edgecolor='k', facecolor='none'))
 
         # Set the aspect ratio to 'equal'
         ax.set_aspect('equal')
