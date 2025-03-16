@@ -28,7 +28,7 @@ def s_param_cascade(s1: sp.snp,s2: sp.snp):
         c2.append((1/s2.z_reference)*((1-s2.complex[0][0][f])*(1-s2.complex[1][1][f])-(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
         d2.append(((1-s2.complex[0][0][f])*(1+s2.complex[1][1][f])+(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
     
-    #cascade netowrk parameters using matrix multiplication
+    #cascade network parameters using matrix multiplication
     for f in range(len(s1.frequencies)):
         a_c.append(a1[f]*a2[f]+b1[f]*c2[f])
         b_c.append(a1[f]*b2[f]+b1[f]*d2[f])
