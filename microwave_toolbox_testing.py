@@ -23,21 +23,24 @@ figure2, ay = plot.subplots()
 
 test = mt.s_param.s_parameter_cascade.s_param_cascade(trans_s2p,trans_s2p)
 
-testabs = [np.abs(x) for x in test[0][1]]
+testabs = [np.abs(x) for x in test[0][0]]
+testreal = [np.real(x) for x in test[0][0]]
+testimag = [np.imag(x) for x in test[0][0]]
 testdb=[20*np.log10(float(x)) for x in testabs]
 
 plot.plot(trans_s2p.frequencies,testdb)
 plot.grid()
-plot.plot(trans_actual.frequencies,trans_actual.dbmag[0][1])
+plot.plot(trans_actual.frequencies,trans_actual.dbmag[0][0])
 
 
 #figure3, ap = plot.subplots(np.real(trans_s2p.complex[1][1]))
 
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()
 ax.plot(trans_s2p.real[0][0],trans_s2p.imag[0][0])
-ax.plot(trans_s2p.real[1][0],trans_s2p.imag[1][0])
-ax.plot(trans_s2p.real[0][1],trans_s2p.imag[0][1])
-ax.plot(trans_s2p.real[1][1],trans_s2p.imag[1][1])
+ax.plot(testreal,testimag)
+#ax.plot(trans_s2p.real[1][0],trans_s2p.imag[1][0])
+#ax.plot(trans_s2p.real[0][1],trans_s2p.imag[0][1])
+#ax.plot(trans_s2p.real[1][1],trans_s2p.imag[1][1])
 ax.grid()
 ax.set_aspect('equal')
 
