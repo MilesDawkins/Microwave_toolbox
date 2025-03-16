@@ -15,7 +15,8 @@ class snp():
             self.phase = [[[]*1]*1]*1
             self.real = [[[]*1]*1]*1
             self.imag = [[[]*1]*1]*1
-        
+            self.complex = [[[]*1]*1]*1
+
             self.version = ""
             self.freq_unit = ""
             self.freq_unit = ""
@@ -87,6 +88,7 @@ class snp():
                             self.linmag.append([[]])
                             self.imag.append([[]])
                             self.real.append([[]])
+                            self.complex.append([[]])
 
                             for j in range(self.num_ports-1):
                                 self.dbmag[i].append([])
@@ -95,6 +97,7 @@ class snp():
                                 self.phase[i].append([])
                                 self.real[i].append([])
                                 self.imag[i].append([])
+                                self.complex[i].append([])
 
                         first_network_data  = False
 
@@ -182,3 +185,4 @@ class snp():
                 self.real[i][j] = [x * y for x, y in zip(self.real[i][j],self.linmag[i][j])]
                 self.imag[i][j] = [np.sin(float(x) * (np.pi/180)) for x in self.phase[i][j]]
                 self.imag[i][j] = [x * y for x, y in zip(self.imag[i][j],self.linmag[i][j])]
+                self.complex[i][j] = [x+y*1j for x,y in zip(self.real[i][j],self.imag[i][j])]

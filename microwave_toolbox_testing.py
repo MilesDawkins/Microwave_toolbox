@@ -3,25 +3,35 @@ import matplotlib.pyplot as plot
 import numpy as np
 import os
 
-a=mt.t_line.microstrip(50,4.4,1.6E-3)
-print(a.width)
-a.length = 1
-print(a.input_z(3E9,0.05,50))
-print(a.input_z(1E9,0.01,0))
 
-file_path = r"C:\Users\miles.dawkins\Downloads\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
+file_path = r"C:\Users\Miles\Downloads\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
 file_path = file_path.replace("\\", "/")
+
+file_path2 = r"C:\Users\Miles\Downloads\trans_cascade.s2p"
+file_path2 = file_path2.replace("\\", "/")
+
 
 #file_dat = mt.misc.spreadsheet(file_path)
 #print(file_dat.col_2_list(4))
 
 
 trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
-
+trans_actual = mt.s_param.s_parameter_reader.snp(file_path2)
 
 #print("type :", trans_s2p.linmag[1][0])
 figure2, ay = plot.subplots()
-ay.plot(trans_s2p.frequencies,trans_s2p.dbmag[1][1])
+
+test = mt.s_param.s_parameter_cascade.s_param_cascade(trans_s2p,trans_s2p)
+
+testabs = [np.abs(x) for x in test[0][1]]
+testdb=[20*np.log10(float(x)) for x in testabs]
+
+plot.plot(trans_s2p.frequencies,testdb)
+plot.grid()
+plot.plot(trans_actual.frequencies,trans_actual.dbmag[0][1])
+
+
+#figure3, ap = plot.subplots(np.real(trans_s2p.complex[1][1]))
 
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()
 ax.plot(trans_s2p.real[0][0],trans_s2p.imag[0][0])
