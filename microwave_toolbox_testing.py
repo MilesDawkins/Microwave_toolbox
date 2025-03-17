@@ -15,7 +15,7 @@ filter = mt.network.s_param(file_path=file)
 
 test = mt.network.s_param_cascade(trans_s2p,filter)
 print(trans_s2p.frequencies)
-plot.plot(test.frequencies,test.dbmag[1][0])
+plot.plot(test.frequencies,test.dbmag[0][0])
 plot.grid()
 
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()
