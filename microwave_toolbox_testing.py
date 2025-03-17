@@ -3,40 +3,44 @@ import matplotlib.pyplot as plot
 import numpy as np
 import os
 
-a=mt.t_line.microstrip(50,4.4,1.6E-3)
-print(a.width)
-a.length = 1
-print(a.input_z(3E9,0.05,50))
-print(a.input_z(1E9,0.01,0))
 
-file_path = r"T:\FQTTXGEN3\AC0009\calibration\TransmitCal-00-60-75-70-11-af_new.csv"
+file_path = r"C:\Users\Miles\Downloads\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
 file_path = file_path.replace("\\", "/")
 
-csv = mt.misc.readCSV(file_path)
-rows = int(len(csv[0]))
-for i in csv:
-    print(i[1])
-#trans_s2p = mt.s_param.s_parameter_reader.snp(file_path)
 
-"""
+
+
+#file_dat = mt.misc.spreadsheet(file_path)
+#print(file_dat.col_2_list(4))
+
+
+trans_s2p = mt.network.s_param(file_path)
+
+
 #print("type :", trans_s2p.linmag[1][0])
 figure2, ay = plot.subplots()
-ay.plot(trans_s2p.frequencies,trans_s2p.dbmag[1][1])
+
+test = mt.network.s_param_cascade(trans_s2p,trans_s2p)
+
+testabs = [np.abs(x) for x in test[0][0]]
+testreal = [np.real(x) for x in test[0][0]]
+testimag = [np.imag(x) for x in test[0][0]]
+testdb=[20*np.log10(float(x)) for x in testabs]
+
+plot.plot(trans_s2p.frequencies,testdb)
+plot.grid()
 
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()
 ax.plot(trans_s2p.real[0][0],trans_s2p.imag[0][0])
-ax.plot(trans_s2p.real[1][0],trans_s2p.imag[1][0])
-ax.plot(trans_s2p.real[0][1],trans_s2p.imag[0][1])
-ax.plot(trans_s2p.real[1][1],trans_s2p.imag[1][1])
+ax.plot(testreal,testimag)
 ax.grid()
 ax.set_aspect('equal')
 
 point = 0
-for xy in zip(trans_s2p.real[1][0], trans_s2p.imag[1][0]):  
+for xy in zip(trans_s2p.real[0][0], trans_s2p.imag[0][0]):  
     if point%10 == 0:
         ax.annotate('(%s)' % trans_s2p.frequencies[point], xy=xy, textcoords='data') 
     point = point + 1
 
 plot.show()
 
-"""

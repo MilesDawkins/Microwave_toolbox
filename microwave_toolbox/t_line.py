@@ -8,6 +8,7 @@ class microstrip():
         self.zo=zo
         self.zl = np.inf
         self.er=er
+        self.ereff = 0
         self.sub_t=sub_t
         self.length = 0
         self.z_in = np.inf

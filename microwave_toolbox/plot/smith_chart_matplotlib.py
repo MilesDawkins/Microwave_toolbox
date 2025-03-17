@@ -56,6 +56,6 @@ class smith_chart():
         ax.set_aspect('equal')
 
         # Set the limits of the plot to accommodate the circle
-        #ax.set_xlim([-1.1, 1.1])
-        #ax.set_ylim([-1.1, 1.1])
+        ax.set_xlim([-1.1, 1.1])
+        ax.set_ylim([-1.1, 1.1])
         return ax
