@@ -6,6 +6,7 @@ import matplotlib.pyplot as plot
 class s_param():
      
     def __init__(self,file_path = None , num_ports = None, frequencies = None):
+            
             # create class instance globals
             self.type = "Network"
             self.sub_type = "S Parameter"
@@ -24,6 +25,7 @@ class s_param():
             self.format = ""
             self.z_reference = 50
 
+            #Check inpuit argumetnts and intitalized accordingly
             if num_ports is not None:
                 self.num_ports = num_ports
                 for i in range(self.num_ports):
@@ -42,14 +44,25 @@ class s_param():
                         self.real[i].append([])
                         self.imag[i].append([])
                         self.complex[i].append([])
-
             else:
                 self.num_ports = 0
-            if frequencies is not None:
-                len(frequencies)
 
-            self.file_path = file_path
+            if frequencies is not None:
+                self.frequencies = frequencies
+                for i in range(self.num_ports):
+                    for j in range(self.num_ports): 
+                        for f in range(len(frequencies)):
+                            self.linmag[i][j].append(0)
+                            self.dbmag[i][j].append(0)
+                            self.phase[i][j].append(0)
+                            self.linmag[i][j].append(0)
+                            self.phase[i][j].append(0)
+                            self.real[i][j].append(0)
+                            self.imag[i][j].append(0)
+                            self.complex[i][j].append(0)
+
             if file_path is not None:
+                self.file_path = file_path
                 self.read_snp(self.file_path)
 
 
@@ -209,15 +222,27 @@ class s_param():
                 self.imag[i][j] = [x * y for x, y in zip(self.imag[i][j],self.linmag[i][j])]
                 self.complex[i][j] = [x+y*1j for x,y in zip(self.real[i][j],self.imag[i][j])]
 
+    def real_imag_2_linmag_phase(self):
+        for i in range(self.num_ports):
+              for j in range(self.num_ports):
+                self.linmag[i][j] = [np.sqrt(x**2 + y**2) for x,y in zip(self.real[i][j],self.imag[i][j])]
+                self.phase[i][j] = [180/np.pi*np.atan(y/x) for x,y in zip(self.real[i][j],self.imag[i][j])]
+                
+
+
+    def complex_2_real_imag(self):
+        for i in range(self.num_ports):
+              for j in range(self.num_ports):
+                self.real[i][j] = [np.real(x) for x in self.complex[i][j]]
+                self.imag[i][j] = [np.imag(x) for x in self.complex[i][j]]
+                
+                
+
 def s_param_cascade(s1: s_param,s2: s_param):
     a1,b1,c1,d1,a2,b2,c2,d2,a_c,b_c,c_c,d_c = [],[],[],[],[],[],[],[],[],[],[],[]
 
     #initialize return matrix
-    s_c = [[[]*1]*1]*1
-    for i in range(2):                    
-        s_c.append([[]])
-        for j in range(1):
-            s_c[i].append([])
+    s_c = s_param(num_ports=2,frequencies=s1.frequencies)
                                
     #convert both sparametrs to ABCD parameters
     for f in range(len(s1.frequencies)):
@@ -240,9 +265,12 @@ def s_param_cascade(s1: s_param,s2: s_param):
 
     #convert cascaded network ABCD aprameters back to s parameters
     for f in range(len(s1.frequencies)):
-        s_c[0][0].append(((a_c[f]+(b_c[f]/s1.z_reference)-(c_c[f]*s1.z_reference)-d_c[f])/(a_c[f]+(b_c[f]/s1.z_reference)+(c_c[f]*s1.z_reference)+d_c[f])))
-        s_c[0][1].append( ((2*(a_c[f]*d_c[f]-b_c[f]*c_c[f]))/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
-        s_c[1][0].append((2/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
-        s_c[1][1].append(((-a_c[f]+b_c[f]/s1.z_reference-c_c[f]*s1.z_reference+d_c[f])/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
+        s_c.complex[0][0][f]=(((a_c[f]+(b_c[f]/s1.z_reference)-(c_c[f]*s1.z_reference)-d_c[f])/(a_c[f]+(b_c[f]/s1.z_reference)+(c_c[f]*s1.z_reference)+d_c[f])))
+        s_c.complex[0][1][f]=( ((2*(a_c[f]*d_c[f]-b_c[f]*c_c[f]))/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
+        s_c.complex[1][0][f]=((2/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
+        s_c.complex[1][1][f]=(((-a_c[f]+b_c[f]/s1.z_reference-c_c[f]*s1.z_reference+d_c[f])/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
+    s_c.complex_2_real_imag()
+    s_c.real_imag_2_linmag_phase()
+    s_c.lin_mag_phase_2_db_mag_phase()
 
     return s_c
