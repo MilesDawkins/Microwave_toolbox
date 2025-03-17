@@ -5,30 +5,52 @@ import matplotlib.pyplot as plot
 
 class s_param():
      
-    def __init__(self,file_path):
+    def __init__(self,file_path = None , num_ports = None, frequencies = None):
             # create class instance globals
-            self.type = ""
-            self.sub_type = ""
-            self.frequencies =[]
+            self.type = "Network"
+            self.sub_type = "S Parameter"
+            self.frequencies = []
             self.dbmag = [[[]*1]*1]*1
             self.linmag = [[[]*1]*1]*1
             self.phase = [[[]*1]*1]*1
             self.real = [[[]*1]*1]*1
             self.imag = [[[]*1]*1]*1
             self.complex = [[[]*1]*1]*1
-
+            
             self.version = ""
             self.freq_unit = ""
             self.freq_unit = ""
             self.type = ""
             self.format = ""
-            self.z_reference = 0
-            self.num_ports = 0
+            self.z_reference = 50
+
+            if num_ports is not None:
+                self.num_ports = num_ports
+                for i in range(self.num_ports):
+                    self.dbmag.append([[]])
+                    self.phase.append([[]])
+                    self.linmag.append([[]])
+                    self.imag.append([[]])
+                    self.real.append([[]])
+                    self.complex.append([[]])
+
+                    for j in range(self.num_ports-1):
+                        self.dbmag[i].append([])
+                        self.phase[i].append([])
+                        self.linmag[i].append([])
+                        self.phase[i].append([])
+                        self.real[i].append([])
+                        self.imag[i].append([])
+                        self.complex[i].append([])
+
+            else:
+                self.num_ports = 0
+            if frequencies is not None:
+                len(frequencies)
+
             self.file_path = file_path
-
-            self.read_snp(self.file_path)
-
-
+            if file_path is not None:
+                self.read_snp(self.file_path)
 
 
     def read_snp(self,file_path):
