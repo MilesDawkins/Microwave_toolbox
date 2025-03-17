@@ -11,6 +11,8 @@ class s_param():
             self.type = "Network"
             self.sub_type = "S Parameter"
             self.frequencies = []
+            self.freq_max = 0
+            self.freq_min = 0
             self.dbmag = [[[]*1]*1]*1
             self.linmag = [[[]*1]*1]*1
             self.phase = [[[]*1]*1]*1
@@ -184,7 +186,14 @@ class s_param():
                     else:
                         raise ValueError("No or unknown number of ports")
                     
-                    self.frequencies.append(freq)
+                    if self.freq_unit == "GHZ":
+                        self.frequencies.append(1E9*freq)
+                    elif self.freq_unit == "MHZ":
+                        self.frequencies.append(1E6*freq)
+                    elif self.freq_unit == "KHZ":
+                        self.frequencies.append(1E3*freq)
+                    elif self.freq_unit == "HZ":
+                        self.frequencies.append(freq)
 
         #calculate all other parameters for easier data use
         if self.format =='DB':
@@ -238,9 +247,9 @@ class s_param():
                 
                 
 
-def s_param_cascade(s1: s_param,s2: s_param):
+def s_param_cascade(s1: s_param,s2: s_param, interp_freq = None):
     a1,b1,c1,d1,a2,b2,c2,d2,a_c,b_c,c_c,d_c = [],[],[],[],[],[],[],[],[],[],[],[]
-
+    
     #initialize return matrix
     s_c = s_param(num_ports=2,frequencies=s1.frequencies)
                                
