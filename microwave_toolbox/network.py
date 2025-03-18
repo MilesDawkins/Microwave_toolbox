@@ -236,8 +236,6 @@ class s_param():
               for j in range(self.num_ports):
                 self.linmag[i][j] = [np.sqrt(x**2 + y**2) for x,y in zip(self.real[i][j],self.imag[i][j])]
                 self.phase[i][j] = [180/np.pi*np.atan(y/x) for x,y in zip(self.real[i][j],self.imag[i][j])]
-                
-
 
     def complex_2_real_imag(self):
         for i in range(self.num_ports):
@@ -248,8 +246,8 @@ class s_param():
                 
 
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
-    a1,b1,c1,d1,a2,b2,c2,d2,a_c,b_c,c_c,d_c = [],[],[],[],[],[],[],[],[],[],[],[]
-    s11_1,s12_1,s21_1,s22_1,s11_2,s12_2,s21_2,s22_2 = 0,0,0,0,0,0,0,0
+    
+    
     #determine frequencies that cascade can be performed
     f_min = min(s1.frequencies[0],s2.frequencies[0])
     f_max = min(s1.frequencies[(len(s1.frequencies)-1)],s2.frequencies[(len(s2.frequencies)-1)])
@@ -272,29 +270,29 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
         s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][0])
         s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][1])
         
-        a1.append(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
-        b1.append(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
-        c1.append((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
-        d1.append(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
+        #convert to ABCD parametersS
+        a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
+        b1=(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
+        c1=((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
+        d1=(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
 
-        a2.append(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
-        b2.append(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
-        c2.append((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
-        d2.append(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
+        a2=(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
+        b2=(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
+        c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
+        d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
          
     #cascade network parameters using matrix multiplication
-    for f in range(len(s_c.frequencies)):
-        a_c.append(a1[f]*a2[f]+b1[f]*c2[f])
-        b_c.append(a1[f]*b2[f]+b1[f]*d2[f])
-        c_c.append(c1[f]*a2[f]+d1[f]*c2[f])
-        d_c.append(c1[f]*b2[f]+d1[f]*d2[f])
+        a_c=(a1*a2+b1*c2)
+        b_c=(a1*b2+b1*d2)
+        c_c=(c1*a2+d1*c2)
+        d_c=(c1*b2+d1*d2)
 
     #convert cascaded network ABCD aprameters back to s parameters
-    for f in range(len(s_c.frequencies)):
-        s_c.complex[0][0][f]=(((a_c[f]+(b_c[f]/s1.z_reference)-(c_c[f]*s1.z_reference)-d_c[f])/(a_c[f]+(b_c[f]/s1.z_reference)+(c_c[f]*s1.z_reference)+d_c[f])))
-        s_c.complex[0][1][f]=( ((2*(a_c[f]*d_c[f]-b_c[f]*c_c[f]))/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
-        s_c.complex[1][0][f]=((2/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
-        s_c.complex[1][1][f]=(((-a_c[f]+b_c[f]/s1.z_reference-c_c[f]*s1.z_reference+d_c[f])/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
+        s_c.complex[0][0][f]=(((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
+        s_c.complex[0][1][f]=( ((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.complex[1][0][f]=((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.complex[1][1][f]=(((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+
     s_c.complex_2_real_imag()
     s_c.real_imag_2_linmag_phase()
     s_c.lin_mag_phase_2_db_mag_phase()
