@@ -210,7 +210,6 @@ class s_param():
         return
 
 
-
     #Functions for calculating and populating different forms or s parameter representations
     def db_mag_phase_2_lin_mag_phase(self):
          for i in range(self.num_ports):
@@ -244,7 +243,6 @@ class s_param():
                 self.imag[i][j] = [np.imag(x) for x in self.complex[i][j]]
                 
                 
-
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     
     
@@ -260,6 +258,7 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     #interpolate frequency points and convert both sparametrs to ABCD parameters
     for f in range(len(s_c.frequencies)):
 
+        #interpolate value at frequency point
         s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][0])
         s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][1])
         s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][0])
@@ -281,18 +280,19 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
         c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
         d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
          
-    #cascade network parameters using matrix multiplication
+        #cascade network parameters using matrix multiplication
         a_c=(a1*a2+b1*c2)
         b_c=(a1*b2+b1*d2)
         c_c=(c1*a2+d1*c2)
         d_c=(c1*b2+d1*d2)
 
-    #convert cascaded network ABCD aprameters back to s parameters
+        #convert cascaded network ABCD aprameters back to s parameters
         s_c.complex[0][0][f]=(((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
         s_c.complex[0][1][f]=( ((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
         s_c.complex[1][0][f]=((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
         s_c.complex[1][1][f]=(((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
 
+    #convert result to all other network forms
     s_c.complex_2_real_imag()
     s_c.real_imag_2_linmag_phase()
     s_c.lin_mag_phase_2_db_mag_phase()
