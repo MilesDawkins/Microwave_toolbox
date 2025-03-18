@@ -12,8 +12,8 @@ file = r"C:\Users\miles\Downloads\ABF-3R3G+_Plus25degC.s2p"
 file = file.replace("\\", "/")
 filter = mt.network.s_param(file_path=file)
 
-test = mt.network.s_param_cascade(trans_s2p,filter,interp_freq_step=10E6)
-
+test = mt.network.s_param_cascade(trans_s2p,filter,interp_freq_step=1E6)
+test = mt.network.s_param_cascade(test,trans_s2p,interp_freq_step=1E6)
 plot.plot(test.frequencies,test.dbmag[1][0])
 plot.grid()
 
@@ -24,9 +24,9 @@ ax.grid()
 ax.set_aspect('equal')
 
 point = 0
-for xy in zip(trans_s2p.real[0][0], trans_s2p.imag[0][0]):  
-    if point%10 == 0:
-        ax.annotate('(%s)' % (trans_s2p.frequencies[point]/1E9), xy=xy, textcoords='data') 
+for xy in zip(test.real[0][0], test.imag[0][0]):  
+    if point%1000 == 0:
+        ax.annotate('(%s)' % (test.frequencies[point]/1E9), xy=xy, textcoords='data') 
     point = point + 1
 
 plot.show()
