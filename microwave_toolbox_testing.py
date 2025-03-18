@@ -8,10 +8,13 @@ file = r"C:\Users\miles\Downloads\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP
 file = file.replace("\\", "/")
 trans_s2p = mt.network.s_param(file_path=file)
 
+file = r"C:\Users\miles\Downloads\ABF-3R3G+_Plus25degC.s2p"
+file = file.replace("\\", "/")
+filter = mt.network.s_param(file_path=file)
 
-test = mt.network.s_param_cascade(trans_s2p,trans_s2p,interp_freq_step=10E6)
+test = mt.network.s_param_cascade(trans_s2p,filter,interp_freq_step=10E6)
 
-plot.plot(test.frequencies,test.dbmag[0][0])
+plot.plot(test.frequencies,test.dbmag[1][0])
 plot.grid()
 
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()

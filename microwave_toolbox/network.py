@@ -249,7 +249,7 @@ class s_param():
 
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     a1,b1,c1,d1,a2,b2,c2,d2,a_c,b_c,c_c,d_c = [],[],[],[],[],[],[],[],[],[],[],[]
-    
+    s11_1,s12_1,s21_1,s22_1,s11_2,s12_2,s21_2,s22_2 = 0,0,0,0,0,0,0,0
     #determine frequencies that cascade can be performed
     f_min = min(s1.frequencies[0],s2.frequencies[0])
     f_max = min(s1.frequencies[(len(s1.frequencies)-1)],s2.frequencies[(len(s2.frequencies)-1)])
@@ -257,29 +257,40 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     
 
     #initialize return matrix
-    s_c = s_param(num_ports=2,frequencies=s1.frequencies)
+    s_c = s_param(num_ports=2,frequencies=freq)
                                
-    #convert both sparametrs to ABCD parameters
-    for f in range(len(s1.frequencies)):
-        a1.append(((1+s1.complex[0][0][f])*(1-s1.complex[1][1][f])+(s1.complex[0][1][f]*s1.complex[1][0][f]))/(2*s1.complex[1][0][f]))
-        b1.append(s1.z_reference*((1+s1.complex[0][0][f])*(1+s1.complex[1][1][f])-(s1.complex[0][1][f]*s1.complex[1][0][f]))/(2*s1.complex[1][0][f]))
-        c1.append((1/s1.z_reference)*((1-s1.complex[0][0][f])*(1-s1.complex[1][1][f])-(s1.complex[0][1][f]*s1.complex[1][0][f]))/(2*s1.complex[1][0][f]))
-        d1.append(((1-s1.complex[0][0][f])*(1+s1.complex[1][1][f])+(s1.complex[0][1][f]*s1.complex[1][0][f]))/(2*s1.complex[1][0][f]))
+    #interpolate frequency points and convert both sparametrs to ABCD parameters
+    for f in range(len(s_c.frequencies)):
 
-        a2.append(((1+s2.complex[0][0][f])*(1-s2.complex[1][1][f])+(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
-        b2.append(s2.z_reference*((1+s2.complex[0][0][f])*(1+s2.complex[1][1][f])-(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
-        c2.append((1/s2.z_reference)*((1-s2.complex[0][0][f])*(1-s2.complex[1][1][f])-(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
-        d2.append(((1-s2.complex[0][0][f])*(1+s2.complex[1][1][f])+(s2.complex[0][1][f]*s2.complex[1][0][f]))/(2*s2.complex[1][0][f]))
-    
+        s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][0])
+        s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][1])
+        s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][0])
+        s22_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][1])
+
+        s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][0])
+        s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][1])
+        s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][0])
+        s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][1])
+        
+        a1.append(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
+        b1.append(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
+        c1.append((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
+        d1.append(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
+
+        a2.append(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
+        b2.append(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
+        c2.append((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
+        d2.append(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
+         
     #cascade network parameters using matrix multiplication
-    for f in range(len(s1.frequencies)):
+    for f in range(len(s_c.frequencies)):
         a_c.append(a1[f]*a2[f]+b1[f]*c2[f])
         b_c.append(a1[f]*b2[f]+b1[f]*d2[f])
         c_c.append(c1[f]*a2[f]+d1[f]*c2[f])
         d_c.append(c1[f]*b2[f]+d1[f]*d2[f])
 
     #convert cascaded network ABCD aprameters back to s parameters
-    for f in range(len(s1.frequencies)):
+    for f in range(len(s_c.frequencies)):
         s_c.complex[0][0][f]=(((a_c[f]+(b_c[f]/s1.z_reference)-(c_c[f]*s1.z_reference)-d_c[f])/(a_c[f]+(b_c[f]/s1.z_reference)+(c_c[f]*s1.z_reference)+d_c[f])))
         s_c.complex[0][1][f]=( ((2*(a_c[f]*d_c[f]-b_c[f]*c_c[f]))/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
         s_c.complex[1][0][f]=((2/(a_c[f]+b_c[f]/s1.z_reference+c_c[f]*s1.z_reference+d_c[f])))
@@ -289,3 +300,9 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     s_c.lin_mag_phase_2_db_mag_phase()
 
     return s_c
+
+def linear_interpolation(x1, y1, x2, y2, x):
+    return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
+
+def closest_value(list_of_numbers, target_value):
+    return min(list_of_numbers, key=lambda x: abs(x - target_value))
