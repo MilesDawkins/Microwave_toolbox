@@ -247,9 +247,15 @@ class s_param():
                 
                 
 
-def s_param_cascade(s1: s_param,s2: s_param, interp_freq = None):
+def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     a1,b1,c1,d1,a2,b2,c2,d2,a_c,b_c,c_c,d_c = [],[],[],[],[],[],[],[],[],[],[],[]
     
+    #determine frequencies that cascade can be performed
+    f_min = min(s1.frequencies[0],s2.frequencies[0])
+    f_max = min(s1.frequencies[(len(s1.frequencies)-1)],s2.frequencies[(len(s2.frequencies)-1)])
+    freq=np.arange(start=f_min,stop=f_max+interp_freq_step,step=interp_freq_step)
+    
+
     #initialize return matrix
     s_c = s_param(num_ports=2,frequencies=s1.frequencies)
                                

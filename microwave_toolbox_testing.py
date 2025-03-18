@@ -4,17 +4,13 @@ import numpy as np
 import os
 
 
-file = r"C:\Users\miles.dawkins\Downloads\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
+file = r"C:\Users\miles\Downloads\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
 file = file.replace("\\", "/")
 trans_s2p = mt.network.s_param(file_path=file)
 
 
-file = r"C:\Users\miles.dawkins\Downloads\ABF-3R3G+_Plus25degC.s2p"
-file = file.replace("\\", "/")
-filter = mt.network.s_param(file_path=file)
+test = mt.network.s_param_cascade(trans_s2p,trans_s2p,interp_freq_step=10E6)
 
-test = mt.network.s_param_cascade(trans_s2p,filter)
-print(trans_s2p.frequencies)
 plot.plot(test.frequencies,test.dbmag[0][0])
 plot.grid()
 
