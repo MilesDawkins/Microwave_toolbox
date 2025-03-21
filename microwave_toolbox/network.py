@@ -100,7 +100,7 @@ class s_param():
                     self.freq_unit = parts[1].upper()
                     self.type = parts[2].upper()
                     self.format = parts[3].upper()
-                    self.z_reference = int(parts[5])
+                    self.z_reference = float(parts[5])
 
                     
 
@@ -205,8 +205,9 @@ class s_param():
             self.lin_mag_phase_2_real_imag() 
 
         if self.format =='RI':
+            self.real_imag_2_linmag_phase() 
             self.lin_mag_phase_2_db_mag_phase()
-            self.lin_mag_phase_2_real_imag() 
+
         return
 
 
@@ -233,14 +234,19 @@ class s_param():
     def real_imag_2_linmag_phase(self):
         for i in range(self.num_ports):
               for j in range(self.num_ports):
-                self.linmag[i][j] = [np.sqrt(x**2 + y**2) for x,y in zip(self.real[i][j],self.imag[i][j])]
-                self.phase[i][j] = [180/np.pi*np.atan(y/x) for x,y in zip(self.real[i][j],self.imag[i][j])]
+                    self.linmag[i][j] = [np.sqrt(x**2 + y**2) for x,y in zip(self.real[i][j],self.imag[i][j])]
+                    self.phase[i][j] = [(180/np.pi)*np.arctan(y/x) if x!=0 else 180 for x,y in zip(self.real[i][j],self.imag[i][j])]
 
     def complex_2_real_imag(self):
         for i in range(self.num_ports):
               for j in range(self.num_ports):
                 self.real[i][j] = [np.real(x) for x in self.complex[i][j]]
                 self.imag[i][j] = [np.imag(x) for x in self.complex[i][j]]
+    
+    def real_imag_2_complex(self):
+        for i in range(self.num_ports):
+              for j in range(self.num_ports):
+                self.complex[i][j] = [x+y*(1j) for x,y in zip(self.real[i][j],self.imag[i][j])]
                 
                 
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
