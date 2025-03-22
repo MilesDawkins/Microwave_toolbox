@@ -5,9 +5,14 @@ import os
 
 
 file_path = r"C:\Users\Miles\OneDrive\Documents\Important_stuff\VCU\Senior_Design\actual_ant_s2p.s2p"
-file_path = file_path.replace("\\", "/")
-channel_1 = mt.network.s_param(file_path)
-plot.plot(channel_1.frequencies,channel_1.phase[1][1])
+ant = mt.network.s_param(file_path)
+
+file_path = r"C:\Users\Miles\OneDrive\Documents\Important_stuff\RF\10GHz EME\Infineon-RFTransistor-SPAR\SPAR\BFP840FESD\BFP840FESD_VCE_2.0V_IC_22mA.s2p"
+trans = mt.network.s_param(file_path)
+
+chain = mt.network.s_param_cascade(trans,ant)
+
+plot.plot(chain.frequencies,chain.dbmag[1][0])
 plot.grid()
 plot.xlim([1.5E9,3E9])
 plot.xlabel("Frequency (Hz)")

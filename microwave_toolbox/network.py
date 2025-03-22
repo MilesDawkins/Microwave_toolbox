@@ -64,6 +64,7 @@ class s_param():
                             self.complex[i][j].append(0)
 
             if file_path is not None:
+                file_path = file_path.replace("\\", "/")
                 self.file_path = file_path
                 self.read_snp(self.file_path)
 
@@ -207,7 +208,7 @@ class s_param():
         if self.format =='RI':
             self.real_imag_2_linmag_phase() 
             self.lin_mag_phase_2_db_mag_phase()
-
+            self.lin_mag_phase_2_complex()
         return
 
 
@@ -234,7 +235,7 @@ class s_param():
     def real_imag_2_linmag_phase(self):
         for i in range(self.num_ports):
               for j in range(self.num_ports):
-                    self.linmag[i][j] = [np.sqrt(x**2 + y**2) for x,y in zip(self.real[i][j],self.imag[i][j])]
+                    self.linmag[i][j] = [np.sqrt(x**2 + y**2) if x!=0 and y!=0 else 1 for x,y in zip(self.real[i][j],self.imag[i][j])]
                     self.phase[i][j] = [(180/np.pi)*np.arctan(y/x) if x!=0 else 180 for x,y in zip(self.real[i][j],self.imag[i][j])]
 
     def complex_2_real_imag(self):
@@ -243,15 +244,15 @@ class s_param():
                 self.real[i][j] = [np.real(x) for x in self.complex[i][j]]
                 self.imag[i][j] = [np.imag(x) for x in self.complex[i][j]]
     
-    def real_imag_2_complex(self):
+    def lin_mag_phase_2_complex(self):            
         for i in range(self.num_ports):
-              for j in range(self.num_ports):
-                self.complex[i][j] = [x+y*(1j) for x,y in zip(self.real[i][j],self.imag[i][j])]
-                
-                
+            for j in range(self.num_ports):
+                self.complex[i][j] = [x+y*1j for x,y in zip(self.real[i][j],self.imag[i][j])]
+
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     
-    
+    if  interp_freq_step == None:
+        interp_freq_step = 10E6
     #determine frequencies that cascade can be performed
     f_min = min(s1.frequencies[0],s2.frequencies[0])
     f_max = min(s1.frequencies[(len(s1.frequencies)-1)],s2.frequencies[(len(s2.frequencies)-1)])
