@@ -11,7 +11,7 @@ file_path = r"C:\Users\Miles\OneDrive\Documents\Important_stuff\RF\10GHz EME\Inf
 trans = mt.network.s_param(file_path)
 
 chain = mt.network.s_param_cascade(trans,ant)
-
+print(chain.age)
 plot.plot(chain.frequencies,chain.dbmag[1][0])
 plot.grid()
 plot.xlim([1.5E9,3E9])

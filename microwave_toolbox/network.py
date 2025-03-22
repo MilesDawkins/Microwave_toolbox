@@ -13,12 +13,13 @@ class s_param():
             self.frequencies = []
             self.freq_max = 0
             self.freq_min = 0
-            self.dbmag = [[[]*1]*1]*1
-            self.linmag = [[[]*1]*1]*1
-            self.phase = [[[]*1]*1]*1
-            self.real = [[[]*1]*1]*1
-            self.imag = [[[]*1]*1]*1
-            self.complex = [[[]*1]*1]*1
+            self.file_data = [[[]*1]*1]*1
+            self.dbmag = None
+            self.linmag = None
+            self.phase = None
+            self.real = None
+            self.imag = None
+            self.complex = None
             
             self.version = ""
             self.freq_unit = ""
@@ -68,6 +69,10 @@ class s_param():
                 self.file_path = file_path
                 self.read_snp(self.file_path)
 
+    def __getattr__(self, attr):
+        if attr=="age":
+            self.age=21   #This can be a long computation
+        return super(s_param, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
 
