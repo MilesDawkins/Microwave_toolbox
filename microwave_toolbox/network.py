@@ -6,22 +6,24 @@ import matplotlib.pyplot as plot
 class s_param():
      
     def __init__(self,file_path = None , num_ports = None, frequencies = None):
+            
             # create class instance globals
             self.type = "Network"
             self.sub_type = "S Parameter"
             self.frequencies = []
             self.freq_max = 0
             self.freq_min = 0
-            self.file_data = [[[]*1]*1]*1
             self.dbmag = [[[]*1]*1]*1
             self.linmag = [[[]*1]*1]*1
             self.phase = [[[]*1]*1]*1
             self.real = [[[]*1]*1]*1
             self.imag = [[[]*1]*1]*1
             self.complex = [[[]*1]*1]*1
-            self.__age = None
+            
             self.version = ""
             self.freq_unit = ""
+            self.freq_unit = ""
+            self.type = ""
             self.format = ""
             self.z_reference = 50
 
@@ -66,34 +68,6 @@ class s_param():
                 self.file_path = file_path
                 self.read_snp(self.file_path)
 
-    def __getattr__(self, attr):
-        if attr=="dbmag":
-            if self.format == "RI": 
-                self.dbmag = real_imag_2_dbmag_phase()
-            elif self.format == "MA":
-                self.dbmag = linmag_phase_2_dbmag_phase()
-            
-        if attr=="linmag":
-            if self.format == "RI": 
-                self.dbmag = real_imag_2_linmag_phase()
-            elif self.format == "DB":
-                self.dbmag = dbmag_phase_2_linmag_phase()
-
-        if attr=="real" or attr=="imag":
-            if self.format == "MA": 
-                self.dbmag = linmag_phase_2_real_imag()
-            elif self.format == "DB":
-                self.dbmag = dbmag_phase_2_real_imag()
-        
-
-
-
-
-
-
-
-                  #This can be a long computation
-        return super(s_param, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
 
@@ -223,6 +197,18 @@ class s_param():
                         self.frequencies.append(freq)
 
         #calculate all other parameters for easier data use
+        if self.format =='DB':
+            self.db_mag_phase_2_lin_mag_phase()
+            self.lin_mag_phase_2_real_imag() 
+
+        if self.format =='MA':
+            self.lin_mag_phase_2_db_mag_phase() 
+            self.lin_mag_phase_2_real_imag() 
+
+        if self.format =='RI':
+            self.real_imag_2_linmag_phase() 
+            self.lin_mag_phase_2_db_mag_phase()
+            self.lin_mag_phase_2_complex()
         return
 
 
@@ -319,8 +305,6 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     s_c.lin_mag_phase_2_db_mag_phase()
 
     return s_c
-
-   
 
 def linear_interpolation(x1, y1, x2, y2, x):
     return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
