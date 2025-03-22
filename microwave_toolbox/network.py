@@ -14,12 +14,6 @@ class s_param():
             self.freq_max = 0
             self.freq_min = 0
             self.file_data = [[[]*1]*1]*1
-            self.dbmag = [[[]*1]*1]*1
-            self.linmag = [[[]*1]*1]*1
-            self.phase = [[[]*1]*1]*1
-            self.real = [[[]*1]*1]*1
-            self.imag = [[[]*1]*1]*1
-            self.complex = [[[]*1]*1]*1
             
             self.version = ""
             self.freq_unit = ""
@@ -28,25 +22,13 @@ class s_param():
             self.format = ""
             self.z_reference = 50
 
-            #Check inpuit argumetnts and intitalized accordingly
+            #Check input argumentts and intitalize accordingly
             if num_ports is not None:
                 self.num_ports = num_ports
                 for i in range(self.num_ports):
-                    self.dbmag.append([[]])
-                    self.phase.append([[]])
-                    self.linmag.append([[]])
-                    self.imag.append([[]])
-                    self.real.append([[]])
-                    self.complex.append([[]])
-
+                    self.file_data.append([[]])
                     for j in range(self.num_ports-1):
-                        self.dbmag[i].append([])
-                        self.phase[i].append([])
-                        self.linmag[i].append([])
-                        self.phase[i].append([])
-                        self.real[i].append([])
-                        self.imag[i].append([])
-                        self.complex[i].append([])
+                        self.file_data[i].append([])          
             else:
                 self.num_ports = 0
 
@@ -55,14 +37,8 @@ class s_param():
                 for i in range(self.num_ports):
                     for j in range(self.num_ports): 
                         for f in range(len(frequencies)):
-                            self.linmag[i][j].append(0)
-                            self.dbmag[i][j].append(0)
-                            self.phase[i][j].append(0)
-                            self.linmag[i][j].append(0)
-                            self.phase[i][j].append(0)
-                            self.real[i][j].append(0)
-                            self.imag[i][j].append(0)
-                            self.complex[i][j].append(0)
+                            self.file_data[i][j].append(None)
+                            
 
             if file_path is not None:
                 file_path = file_path.replace("\\", "/")
@@ -71,8 +47,8 @@ class s_param():
 
     #dynamically calculate specified attribute, lowers memory allocation of a single network class
     def __getattr__(self, attr):
-        if attr=="age":
-            self.age=21   #This can be a long computation
+        if attr=="dbmag":
+            self.dbmag = self.calc_dbmag()   #This can be a long computation
         return super(s_param, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
@@ -109,9 +85,6 @@ class s_param():
                     self.format = parts[3].upper()
                     self.z_reference = float(parts[5])
 
-                    
-
-
                 else:
                     # Parse network data lines
                     network_data = list(map(float, line.split()))
@@ -126,22 +99,10 @@ class s_param():
                         self.num_ports = int(numport)
 
                         for i in range(self.num_ports):
-                            
-                            self.dbmag.append([[]])
-                            self.phase.append([[]])
-                            self.linmag.append([[]])
-                            self.imag.append([[]])
-                            self.real.append([[]])
-                            self.complex.append([[]])
-
+                            self.file_data.append([[]])
                             for j in range(self.num_ports-1):
-                                self.dbmag[i].append([])
-                                self.phase[i].append([])
-                                self.linmag[i].append([])
-                                self.phase[i].append([])
-                                self.real[i].append([])
-                                self.imag[i].append([])
-                                self.complex[i].append([])
+                                self.file_data[i].append([])
+                                
 
                         first_network_data  = False
 
@@ -149,45 +110,15 @@ class s_param():
                     # determine file type and extract data   
                     # note:.s2p file types have different sequence than all other sNp file types (y tho???)
                     if self.ext[2] == '2':
-                        if self.format == "DB":
-                            self.dbmag[0][0].append(network_data[1]), self.phase[0][0].append(network_data[2])
-                            self.dbmag[1][0].append(network_data[3]), self.phase[1][0].append(network_data[4])
-                            self.dbmag[0][1].append(network_data[5]), self.phase[0][1].append(network_data[6])
-                            self.dbmag[1][1].append(network_data[7]), self.phase[1][1].append(network_data[8])
+                        self.file_data[0][0].append([network_data[1], network_data[2]])
+                        self.file_data[1][0].append([network_data[1], network_data[2]])
+                        self.file_data[0][1].append([network_data[1], network_data[2]])
+                        self.file_data[1][1].append([network_data[1], network_data[2]])
 
-                        elif self.format == "MA":
-                            self.linmag[0][0].append(network_data[1]), self.phase[0][0].append(network_data[2])
-                            self.linmag[1][0].append(network_data[3]), self.phase[1][0].append(network_data[4])
-                            self.linmag[0][1].append(network_data[5]), self.phase[0][1].append(network_data[6])
-                            self.linmag[1][1].append(network_data[7]), self.phase[1][1].append(network_data[8])
-
-                        elif self.format == "RI":
-                            self.real[0][0].append(network_data[1]), self.imag[0][0].append(network_data[2])
-                            self.real[1][0].append(network_data[3]), self.imag[1][0].append(network_data[4])
-                            self.real[0][1].append(network_data[5]), self.imag[0][1].append(network_data[6])
-                            self.real[1][1].append(network_data[7]), self.imag[1][1].append(network_data[8])
-
-                        else:
-                             raise ValueError("Data Format Unsupported")
-                        
-
-                    elif self.num_ports != 0:
-                        if self.format == "DB":
-                            for i in range(self.num_ports):
-                                for j in range(self.num_ports): 
-                                    self.dbmag[i][j].append(network_data[i*self.num_ports*2 + 2*j+1]), self.phase[i][j].append(network_data[i*self.num_ports*2 + 2*j+2])
-
-
-                        elif self.format == "MA":
-                            for i in range(self.num_ports):
-                                for j in range(self.num_ports): 
-                                    self.linmag[i][j].append(network_data[i*self.num_ports*2 + 2*j+1]), self.phase[i][j].append(network_data[i*self.num_ports*2 + 2*j+2])
-
-                        elif self.format == "RI":
-                            for i in range(self.num_ports):
-                                for j in range(self.num_ports): 
-                                    self.real[i][j].append(network_data[i*self.num_ports*2 + 2*j+1]), self.imag[i][j].append(network_data[i*self.num_ports*2 + 2*j+2])
-
+                    elif self.num_ports != 0 and self.num_ports !=2:
+                        for i in range(self.num_ports):
+                            for j in range(self.num_ports): 
+                                self.file_data[i][j].append(network_data[i*self.num_ports*2 + 2*j+1], network_data[i*self.num_ports*2 + 2*j+2])
                         else:
                              raise ValueError("Data Format Unsupported")
                     else:
@@ -201,21 +132,26 @@ class s_param():
                         self.frequencies.append(1E3*freq)
                     elif self.freq_unit == "HZ":
                         self.frequencies.append(freq)
-
-        #calculate all other parameters for easier data use
-        if self.format =='DB':
-            self.db_mag_phase_2_lin_mag_phase()
-            self.lin_mag_phase_2_real_imag() 
-
-        if self.format =='MA':
-            self.lin_mag_phase_2_db_mag_phase() 
-            self.lin_mag_phase_2_real_imag() 
-
-        if self.format =='RI':
-            self.real_imag_2_linmag_phase() 
-            self.lin_mag_phase_2_db_mag_phase()
-            self.lin_mag_phase_2_complex()
         return
+
+    def calc_dbmag(self):
+        temp = [[[]*len(self.frequencies)]*self.num_ports]*self.num_ports
+        for i in range(self.num_ports):
+              for j in range(self.num_ports): 
+                if self.format == "DB":  
+                    temp[i][j] =([x[0] for x in self.file_data[i][j]])
+                elif self.format == "RI":  
+                    temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
+                elif self.format == "MA":  
+                    temp[i][j] = ([10*np.log10(x[0]) for x in self.file_data[i][j]])
+        return temp
+    
+
+
+
+
+
+
 
 
     #Functions for calculating and populating different forms or s parameter representations
