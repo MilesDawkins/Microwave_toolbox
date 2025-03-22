@@ -14,7 +14,6 @@ class s_param():
             self.freq_max = 0
             self.freq_min = 0
             self.file_data = [[[]*1]*1]*1
-            
             self.version = ""
             self.freq_unit = ""
             self.freq_unit = ""
@@ -111,9 +110,9 @@ class s_param():
                     # note:.s2p file types have different sequence than all other sNp file types (y tho???)
                     if self.ext[2] == '2':
                         self.file_data[0][0].append([network_data[1], network_data[2]])
-                        self.file_data[1][0].append([network_data[1], network_data[2]])
-                        self.file_data[0][1].append([network_data[1], network_data[2]])
-                        self.file_data[1][1].append([network_data[1], network_data[2]])
+                        self.file_data[1][0].append([network_data[3], network_data[4]])
+                        self.file_data[0][1].append([network_data[5], network_data[6]])
+                        self.file_data[1][1].append([network_data[7], network_data[8]])
 
                     elif self.num_ports != 0 and self.num_ports !=2:
                         for i in range(self.num_ports):
@@ -139,20 +138,13 @@ class s_param():
         for i in range(self.num_ports):
               for j in range(self.num_ports): 
                 if self.format == "DB":  
-                    temp[i][j] =([x[0] for x in self.file_data[i][j]])
+                    temp[i][j] = ([x[0] for x in self.file_data[i][j]])
                 elif self.format == "RI":  
                     temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
                 elif self.format == "MA":  
-                    temp[i][j] = ([10*np.log10(x[0]) for x in self.file_data[i][j]])
+                    temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
         return temp
     
-
-
-
-
-
-
-
 
     #Functions for calculating and populating different forms or s parameter representations
     def db_mag_phase_2_lin_mag_phase(self):
