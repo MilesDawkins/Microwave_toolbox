@@ -14,12 +14,12 @@ class s_param():
             self.freq_max = 0
             self.freq_min = 0
             self.file_data = [[[]*1]*1]*1
-            self.dbmag = None
-            self.linmag = None
-            self.phase = None
-            self.real = None
-            self.imag = None
-            self.complex = None
+            self.dbmag = [[[]*1]*1]*1
+            self.linmag = [[[]*1]*1]*1
+            self.phase = [[[]*1]*1]*1
+            self.real = [[[]*1]*1]*1
+            self.imag = [[[]*1]*1]*1
+            self.complex = [[[]*1]*1]*1
             
             self.version = ""
             self.freq_unit = ""
