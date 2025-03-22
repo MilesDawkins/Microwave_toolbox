@@ -69,6 +69,7 @@ class s_param():
                 self.file_path = file_path
                 self.read_snp(self.file_path)
 
+    #dynamically calculate specified attribute, lowers memory allocation of a single network class
     def __getattr__(self, attr):
         if attr=="age":
             self.age=21   #This can be a long computation
