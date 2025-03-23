@@ -47,7 +47,13 @@ class s_param():
     #dynamically calculate specified attribute, lowers memory allocation of a single network class
     def __getattr__(self, attr):
         if attr=="dbmag":
-            self.dbmag = self.calc_dbmag()   #This can be a long computation
+            self.dbmag = self.calc_dbmag()
+        if attr=="linmag":
+            self.linmag = self.calc_linmag()
+        if attr=="phase":
+            self.phase = self.calc_phase()
+        if attr=="complex":
+            self.complex = self.calc_complex()
         return super(s_param, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
@@ -99,7 +105,7 @@ class s_param():
 
                         for i in range(self.num_ports):
                             self.file_data.append([[]])
-                            for j in range(self.num_ports-1):
+                            for j in range(self.num_ports):
                                 self.file_data[i].append([])
                                 
 
@@ -134,54 +140,76 @@ class s_param():
         return
 
     def calc_dbmag(self):
-        temp = [[[]*len(self.frequencies)]*self.num_ports]*self.num_ports
+        temp = [[[]]]
+        for i in range(self.num_ports):
+            temp.append([[]])
+            for j in range(self.num_ports):
+                temp[i].append([])
+
         for i in range(self.num_ports):
               for j in range(self.num_ports): 
                 if self.format == "DB":  
                     temp[i][j] = ([x[0] for x in self.file_data[i][j]])
                 elif self.format == "RI":  
-                    temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
+                    temp[i][j] = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data[i][j]])
                 elif self.format == "MA":  
                     temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
+                print("got here")
         return temp
     
-
-    #Functions for calculating and populating different forms or s parameter representations
-    def db_mag_phase_2_lin_mag_phase(self):
-         for i in range(self.num_ports):
-              for j in range(self.num_ports):   
-                self.linmag[i][j]=[10**(float(x)/20) for x in self.dbmag[i][j]]
-
-    def lin_mag_phase_2_db_mag_phase(self):
-         for i in range(self.num_ports):
-              for j in range(self.num_ports):   
-                self.dbmag[i][j]=[20*np.log10(float(x)) for x in self.linmag[i][j]]
-
-    def lin_mag_phase_2_real_imag(self):
-         for i in range(self.num_ports):
-              for j in range(self.num_ports):
-                self.real[i][j] = [np.cos(float(x) * (np.pi/180)) for x in self.phase[i][j]]
-                self.real[i][j] = [x * y for x, y in zip(self.real[i][j],self.linmag[i][j])]
-                self.imag[i][j] = [np.sin(float(x) * (np.pi/180)) for x in self.phase[i][j]]
-                self.imag[i][j] = [x * y for x, y in zip(self.imag[i][j],self.linmag[i][j])]
-                self.complex[i][j] = [x+y*1j for x,y in zip(self.real[i][j],self.imag[i][j])]
-
-    def real_imag_2_linmag_phase(self):
+    def calc_linmag(self):
+        temp = [[[]]]
         for i in range(self.num_ports):
-              for j in range(self.num_ports):
-                    self.linmag[i][j] = [np.sqrt(x**2 + y**2) if x!=0 and y!=0 else 1 for x,y in zip(self.real[i][j],self.imag[i][j])]
-                    self.phase[i][j] = [(180/np.pi)*np.arctan(y/x) if x!=0 else 180 for x,y in zip(self.real[i][j],self.imag[i][j])]
-
-    def complex_2_real_imag(self):
-        for i in range(self.num_ports):
-              for j in range(self.num_ports):
-                self.real[i][j] = [np.real(x) for x in self.complex[i][j]]
-                self.imag[i][j] = [np.imag(x) for x in self.complex[i][j]]
-    
-    def lin_mag_phase_2_complex(self):            
-        for i in range(self.num_ports):
+            temp.append([[]])
             for j in range(self.num_ports):
-                self.complex[i][j] = [x+y*1j for x,y in zip(self.real[i][j],self.imag[i][j])]
+                temp[i].append([])
+
+        for i in range(self.num_ports):
+              for j in range(self.num_ports):
+                if self.format == "DB":  
+                    temp[i][j] = ([10**(x[0]/20) for x in self.file_data[i][j]])
+                elif self.format == "RI":  
+                    temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
+                elif self.format == "MA":  
+                    temp[i][j] = [x[0] for x in self.file_data[i][j]] 
+
+        return temp
+    
+    def calc_phase(self):
+        temp = [[[]]]
+        for i in range(self.num_ports):
+            temp.append([[]])
+            for j in range(self.num_ports):
+                temp[i].append([])
+                
+        for i in range(self.num_ports):
+              for j in range(self.num_ports): 
+                if self.format == "DB":  
+                    temp[i][j] = ([x[1] for x in self.file_data[i][j]])
+                elif self.format == "RI":  
+                    temp[i][j] = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data[i][j]]
+                elif self.format == "MA":  
+                    print("Got here")
+                    temp[i][j] = ([x[1] for x in self.file_data[i][j]])
+        return temp
+    
+    def calc_complex(self):
+        temp = [[[]]]
+        for i in range(self.num_ports):
+            temp.append([[]])
+            for j in range(self.num_ports):
+                temp[i].append([])
+
+        for i in range(self.num_ports):
+              for j in range(self.num_ports): 
+                if self.format == "DB":  
+                    temp[i][j] = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data[i][j]]
+                elif self.format == "RI":  
+                    temp[i][j] = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
+                elif self.format == "MA": 
+                    temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
+        return temp
+   
 
 def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     
@@ -228,15 +256,17 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
         d_c=(c1*b2+d1*d2)
 
         #convert cascaded network ABCD aprameters back to s parameters
-        s_c.complex[0][0][f]=(((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
-        s_c.complex[0][1][f]=( ((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-        s_c.complex[1][0][f]=((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-        s_c.complex[1][1][f]=(((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.format = "RI"
+        temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
+        s_c.file_data[0][0][f]=[np.real(temp), np.imag(temp)]
+        temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[0][1][f]=[np.real(temp), np.imag(temp)]
+        temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[1][0][f]=[np.real(temp), np.imag(temp)]
+        temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[1][1][f]=[np.real(temp), np.imag(temp)]
 
     #convert result to all other network forms
-    s_c.complex_2_real_imag()
-    s_c.real_imag_2_linmag_phase()
-    s_c.lin_mag_phase_2_db_mag_phase()
 
     return s_c
 
