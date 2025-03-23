@@ -3,7 +3,7 @@ import cmath
 import os
 import matplotlib.pyplot as plot
 
-class s_param():
+class network():
      
     def __init__(self,file_path = None , num_ports = None, frequencies = None):
             
@@ -54,7 +54,7 @@ class s_param():
             self.phase = self.calc_phase()
         if attr=="complex":
             self.complex = self.calc_complex()
-        return super(s_param, self).__getattribute__(attr)
+        return super(network, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
 
@@ -189,7 +189,6 @@ class s_param():
                 elif self.format == "RI":  
                     temp[i][j] = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data[i][j]]
                 elif self.format == "MA":  
-                    print("Got here")
                     temp[i][j] = ([x[1] for x in self.file_data[i][j]])
         return temp
     
@@ -209,9 +208,9 @@ class s_param():
                 elif self.format == "MA": 
                     temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
         return temp
-   
 
-def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
+
+def network_cascade(s1: network,s2: network, interp_freq_step = None):
     
     if  interp_freq_step == None:
         interp_freq_step = 10E6
@@ -222,7 +221,7 @@ def s_param_cascade(s1: s_param,s2: s_param, interp_freq_step = None):
     
 
     #initialize return matrix
-    s_c = s_param(num_ports=2,frequencies=freq)
+    s_c = network(num_ports=2,frequencies=freq)
                                
     #interpolate frequency points and convert both sparametrs to ABCD parameters
     for f in range(len(s_c.frequencies)):
