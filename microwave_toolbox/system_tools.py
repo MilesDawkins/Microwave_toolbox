@@ -208,6 +208,15 @@ class network():
                     temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
         return temp
 
+def reverse_network(s1: network):
+   temp1 =  s1.file_data[0][0]
+   temp2 = s1.file_data[1][0]
+   s1.file_data[0][0] = [x for x in s1.file_data[1][1]]
+   s1.file_data[1][1] = [x for x in temp1]
+   s1.file_data[1][0] = [x for x in s1.file_data[0][1]]
+   s1.file_data[0][1] = [x for x in temp2]
+   
+
 
 def network_cascade(s1: network,s2: network, interp_freq_step = None):
     
