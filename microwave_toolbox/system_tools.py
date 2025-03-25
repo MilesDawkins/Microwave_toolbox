@@ -154,7 +154,6 @@ class network():
                     temp[i][j] = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data[i][j]])
                 elif self.format == "MA":  
                     temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
-                print("got here")
         return temp
     
     def calc_linmag(self):
