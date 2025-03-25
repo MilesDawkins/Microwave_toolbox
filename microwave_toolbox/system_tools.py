@@ -16,8 +16,6 @@ class network():
             self.file_data = [[[]*1]*1]*1
             self.version = ""
             self.freq_unit = ""
-            self.freq_unit = ""
-            self.type = ""
             self.format = ""
             self.z_reference = 50
 
