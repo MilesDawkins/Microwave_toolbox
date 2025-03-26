@@ -18,6 +18,7 @@ class network():
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
+            self.reversed = False
 
             #Check input argumentts and intitalize accordingly
             if num_ports is not None:
@@ -213,6 +214,7 @@ def reverse_network(s1: network):
    s1.file_data[1][1] = [x for x in temp1]
    s1.file_data[1][0] = [x for x in s1.file_data[0][1]]
    s1.file_data[0][1] = [x for x in temp2]
+   s1.reversed = True
 
 def network_cascade(s1: network,s2: network, interp_freq_step = None):
     
