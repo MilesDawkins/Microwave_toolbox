@@ -15,7 +15,7 @@ trans_s2p = mt.system_tools.network(file_path=file)
 cascade = mt.system_tools.network_cascade(trans_s2p,trans_s2p,10E6)
 
 plot.plot(cascade.frequencies,cascade.dbmag[1][0])
-
+plot.grid()
 """smith chart testing
 ax=mt.plot.smith_chart_matplotlib.smith_chart.__init__()
 ax.plot([np.real(x) for x in cascade.complex[1][1]],[np.imag(y) for y in cascade.complex[1][1]])

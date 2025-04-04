@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Create a sample 2D array (e.g., an image)
-image = np.random.rand(128, 128)
+# Generate a sample 2D signal (e.g., a grayscale image)
+image = np.zeros((64, 64))
+image[20:40, 20:40] = 1  # Create a white square in the center
 
 # Compute the 2D FFT
 fft_image = np.fft.fft2(image)
-
+print(fft_image)
 # Shift the zero-frequency component to the center
 fft_shifted = np.fft.fftshift(fft_image)
 
