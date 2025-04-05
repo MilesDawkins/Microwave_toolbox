@@ -1,4 +1,4 @@
-from .plot import *
+from . import plotting_tools
 from . import t_line_tools
 from . import misc
 from . import system_tools
