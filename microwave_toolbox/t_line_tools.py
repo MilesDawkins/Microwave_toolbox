@@ -1,4 +1,5 @@
 import numpy as np
+from . import system_tools
 
 class microstrip():
     def __init__(self,zo,er,sub_t):
@@ -12,6 +13,7 @@ class microstrip():
         self.sub_t=sub_t
         self.length = 0
         self.z_in = np.inf
+        self.network = system_tools.network(num_ports = 2)
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
         
