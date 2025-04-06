@@ -6,7 +6,15 @@ from . import plotting_tools
 
 
 class rf_amplifier():
-
+    """
+    references for this tool:
+    https://www.allaboutcircuits.com/technical-articles/designing-a-unilateral-rf-amplifier-for-a-specified-gain/
+    https://www.allaboutcircuits.com/technical-articles/learn-about-unconditional-stability-and-potential-instability-in-rf-amplifier-design/
+    https://www.allaboutcircuits.com/technical-articles/learn-about-designing-unilateral-low-noise-amplifiers/
+    https://www.allaboutcircuits.com/technical-articles/bilateral-rf-amplifier-design-simultaneous-conjugate-matching-for-maximum-gain/
+    https://www.allaboutcircuits.com/technical-articles/using-the-operating-power-gain-to-design-a-bilateral-rf-amplifier/
+    "Microwave Transistor Amplifiers 2nd Edition" by Guillermo Gonzalez
+    """
     def __init__(self, s2p_in: st.network):
         #initialize basic variables
         self.type = "Amplifier"
