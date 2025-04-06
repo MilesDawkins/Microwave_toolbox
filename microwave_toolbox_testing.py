@@ -29,7 +29,7 @@ for xy in zip(real, imag):
 
 source,load = amp.calc_transducer_impedance(4E9)
 
-sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(0.3,6E9)
+sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(0.5,3E9)
 xl = np.real(lc)
 yl = np.imag(lc)
 xs = np.real(sc)
@@ -45,4 +45,5 @@ smith.ax.plot(np.real(min_gl),np.imag(min_gl), marker='o', linestyle='none')
 
 print("--- %s seconds ---" % (time.time() - start_time))
 plot.show()
+
 
