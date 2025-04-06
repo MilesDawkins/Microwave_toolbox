@@ -206,6 +206,13 @@ class network():
                 elif self.format == "MA": 
                     temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
         return temp
+    
+    def calc_impedance(self,freq):
+        gamma_11 = np.interp(freq,self.frequencies,self.complex[0][0])
+        z_s11 = self.z_reference*((-1-gamma_11)/(gamma_11-1))
+        gamma_22 = np.interp(freq,self.frequencies,self.complex[1][1])
+        z_s22 = self.z_reference*((-1-gamma_22)/(gamma_22-1))
+        return z_s11,z_s22
 
 def reverse_network(s1: network):
    temp1 =  s1.file_data[0][0]
