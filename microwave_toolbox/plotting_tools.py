@@ -38,11 +38,11 @@ class smith_chart():
                 self.ax.add_patch(patches.Circle((val/(1+val),0), 1/(1+val), edgecolor='r', facecolor='none'))
 
             # Shows negative resistances as blue contours
-            elif val < 0:
+            elif val < 0 and val != -1:
                 self.ax.add_patch(patches.Circle((val/(1+val),0), 1/(1+val), edgecolor='b', facecolor='none'))
 
             # shows normal resistances as black contours
-            else:
+            elif val != -1:
                 self.ax.add_patch(patches.Circle((val/(1+val),0), 1/(1+val), edgecolor='k', facecolor='none'))
 
         #Add the reactance circles

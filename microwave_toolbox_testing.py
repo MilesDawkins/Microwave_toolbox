@@ -11,15 +11,16 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
+freq = 4E9
 trans_s2p = mt.system_tools.network(file_path=file)
 amp = mt.circuit_tools.rf_amplifier(trans_s2p)
-source,load = amp.calc_transducer_impedance(4E9)
-sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(-12.53/2,4E9)
+source,load = amp.calc_transducer_impedance(freq)
+sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(0.4,freq)
 xl,yl = np.real(lc),np.imag(lc)
 xs,ys = np.real(sc),np.imag(sc)
-print(10*np.log10(np.interp(4E9,amp.frequencies,amp.max_z0_transducer_gain)))
-print(10*np.log10(np.interp(4E9,amp.frequencies,amp.g_s_max_gain)))
-print(10*np.log10(np.interp(4E9,amp.frequencies,amp.g_l_max_gain)))
+print(10*np.log10(np.interp(freq,amp.frequencies,amp.max_z0_transducer_gain)))
+print(10*np.log10(np.interp(freq,amp.frequencies,amp.g_s_max_gain)))
+print(10*np.log10(np.interp(freq,amp.frequencies,amp.g_l_max_gain)))
 print(source*((-1-min_gs)/(min_gs-1)))
 print(load*((-1-min_gl)/(min_gl-1)))
 
