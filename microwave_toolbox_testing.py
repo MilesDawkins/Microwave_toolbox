@@ -29,7 +29,7 @@ for xy in zip(real, imag):
 
 source,load = amp.calc_transducer_impedance(4E9)
 
-sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(0.5,3E9)
+sc,sr,lc,lr,min_gs,min_gl = amp.calc_gain_circle(0.1,1E9)
 xl = np.real(lc)
 yl = np.imag(lc)
 xs = np.real(sc)
