@@ -5,7 +5,7 @@ import matplotlib.pyplot as plot
 
 class network():
      
-    def __init__(self,file_path = None , num_ports = None, frequencies = None):
+    def __init__(self,file_path = None , num_ports = None, frequencies = None, s_user = None, format = None):
             
             # create class instance globals
             self.type = "Network"
@@ -20,6 +20,8 @@ class network():
             self.z_reference = 50
             self.reversed = False
 
+            if format is not None:
+                self.format = format
             #Check input argumentts and intitalize accordingly
             if num_ports is not None:
                 self.num_ports = num_ports
@@ -35,7 +37,10 @@ class network():
                 for i in range(self.num_ports):
                     for j in range(self.num_ports): 
                         for f in range(len(frequencies)):
-                            self.file_data[i][j].append(None)
+                            if s_user is not None:
+                                self.file_data[i][j].append(s_user[i][j][f])
+                            else:
+                                self.file_data[i][j].append([None,None])
                             
 
             if file_path is not None:

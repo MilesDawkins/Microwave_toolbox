@@ -13,7 +13,7 @@ class microstrip():
         self.sub_t=sub_t
         self.length = 0
         self.z_in = np.inf
-        self.network = system_tools.network(num_ports = 2)
+        
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
         
@@ -47,6 +47,24 @@ class microstrip():
         
         # calculate parameters of waves on line
         self.vp_line=299792458/np.sqrt(self.ereff)
+
+    def create_network(self,freqs,length):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        for f in range(len(freqs)):
+            lambda_freq = self.vp_line/freqs[f]
+            beta_freq = (2*np.pi)/lambda_freq
+            #s11
+            self.network.file_data[0][0][f][0]=0.00001
+            self.network.file_data[0][0][f][1]=0
+            #s21
+            self.network.file_data[1][0][f][0]=1
+            self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
+            #s12
+            self.network.file_data[0][1][f][0]=1
+            self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
+            #s22
+            self.network.file_data[1][1][f][0]=0.00001
+            self.network.file_data[1][1][f][1]=0
 
     def wavelength(self,frequency):
         self.lambda_line = self.vp_line/frequency

@@ -45,19 +45,11 @@ class rf_amplifier():
         load_radius = (np.sqrt(1-g_l_norm)*(1-np.abs(s22)**2))/(1-np.abs(s22)**2*(1-g_l_norm))
 
         min_gamma_mag_s = np.abs(source_center)-np.abs(source_radius)
-        min_gamma_ang_s = np.atan(np.imag(source_center)/np.real(source_center))
-        if np.imag(source_center) < 0:
-            min_gamma_ang_s = min_gamma_ang_s + np.pi
-        if min_gamma_ang_s < 0:
-            min_gamma_ang_s = min_gamma_ang_s + np.pi
+        min_gamma_ang_s = np.atan2(np.imag(source_center),np.real(source_center))
         min_gamma_source = (min_gamma_mag_s*np.cos(min_gamma_ang_s) + 1j*min_gamma_mag_s*np.sin(min_gamma_ang_s))
 
         min_gamma_mag_l = np.abs(load_center)-np.abs(load_radius)
-        min_gamma_ang_l = np.atan(np.imag(load_center)/np.real(load_center))
-        if np.imag(load_center) < 0:
-            min_gamma_ang_l = min_gamma_ang_l + np.pi
-        if min_gamma_ang_l < 0:
-            min_gamma_ang_l = min_gamma_ang_l + np.pi
+        min_gamma_ang_l = np.atan2(np.imag(load_center),np.real(load_center))
         min_gamma_load = (min_gamma_mag_l*np.cos(min_gamma_ang_l) + 1j*min_gamma_mag_l*np.sin(min_gamma_ang_l))
 
         return source_center,source_radius,load_center,load_radius, min_gamma_source, min_gamma_load
