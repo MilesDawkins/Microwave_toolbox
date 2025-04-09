@@ -11,8 +11,8 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freq = 4E9
-desired_gain = 20
+freq = 10E9
+desired_gain = 15
 trans_s2p = mt.system_tools.network(file_path=file)
 amp = mt.circuit_tools.rf_amplifier(trans_s2p)
 source,load = amp.calc_transducer_impedance(freq)
@@ -24,8 +24,8 @@ xs,ys = np.real(sc),np.imag(sc)
 print(trans_gain)
 print(10*np.log10(np.interp(freq,amp.frequencies,amp.g_s_max_gain)))
 print(10*np.log10(np.interp(freq,amp.frequencies,amp.g_l_max_gain)))
-print((source*((-1-min_gs)/(min_gs-1)))/50)
-print((load*((-1-min_gl)/(min_gl-1)))/50)
+print((50*((-1-min_gs)/(min_gs-1))))
+print((50*((-1-min_gl)/(min_gl-1))))
 print(trans_gain+2*sl_gain_needed)
 print("--- %s seconds ---" % (time.time() - start_time))
 

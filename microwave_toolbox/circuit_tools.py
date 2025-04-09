@@ -48,7 +48,6 @@ class rf_amplifier():
         min_gamma_ang_s = np.atan(np.imag(source_center)/np.real(source_center))
         if np.imag(source_center) < 0:
             min_gamma_ang_s = min_gamma_ang_s + np.pi
-        print(min_gamma_ang_s)
         if min_gamma_ang_s < 0:
             min_gamma_ang_s = min_gamma_ang_s + np.pi
         min_gamma_source = (min_gamma_mag_s*np.cos(min_gamma_ang_s) + 1j*min_gamma_mag_s*np.sin(min_gamma_ang_s))
