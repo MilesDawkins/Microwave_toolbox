@@ -1,10 +1,14 @@
 import numpy as np
+import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t):
+    def __init__(self,zo,er,sub_t, type = None):
         # create class instance globals
-        self.type = "t_line"
+        if type is None:
+            self.type = "t_line"
+        else:
+            self.type = type
         self.sub_type = "microstrip"
         self.zo=zo
         self.zl = np.inf
@@ -13,7 +17,7 @@ class microstrip():
         self.sub_t=sub_t
         self.length = 0
         self.z_in = np.inf
-        self.network = system_tools.network(num_ports = 2)
+        
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
         
@@ -23,16 +27,16 @@ class microstrip():
         # calculate a and b for microstrip equations
         a=(zo_in/60)*np.sqrt((er+1)/2)+((er-1)/(er+1))*(0.23+(0.11/er))
         b=(377*np.pi)/(2*zo_in*np.sqrt(er))
-
         # calculate the 2 equations for stripwidth/thickness
         wsd1=(8*np.exp(a)/(np.exp(2*a)-2))
         wsd2=(2/np.pi)*(b-1-np.log(2*b-1)+((er-1)/(2*er))*(np.log(b-1)+0.39-(0.61/er)))
-
+        
         # determine valid equation and strip width
         if(wsd1<2):
             self.width=sub_t*wsd1
             wsdf=wsd1
-        elif(wsd2>=2):
+        elif(wsd1>=2):
+            print(wsd2)
             self.width=sub_t*wsd2
             wsdf=wsd2
         
@@ -48,21 +52,47 @@ class microstrip():
         # calculate parameters of waves on line
         self.vp_line=299792458/np.sqrt(self.ereff)
 
+    def create_network(self,freqs,length):
+        self.length = length
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        for f in range(len(freqs)):
+            lambda_freq = self.vp_line/freqs[f]
+            beta_freq = (2*np.pi)/lambda_freq
+
+            if self.type is "t_line":
+                if self.zo != 50:
+                    gamma_in = (self.zo-50)/(self.zo+50)
+                else:
+                    gamma_in = 1E-12
+            elif self.type is "short":
+                gamma_in = (self.input_z(freqs[f],self.length,0)-50)/(self.input_z(freqs[f],self.length,0)+50)
+            elif self.type is "open":
+                gamma_in = (self.input_z(freqs[f],self.length,np.inf)-50)/(self.input_z(freqs[f],self.length,np.inf)+50)
+            #s11
+            self.network.file_data[0][0][f][0]=np.abs(gamma_in)
+            self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
+            #s21
+            self.network.file_data[1][0][f][0]=1*np.abs(gamma_in)**2
+            self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
+            #s12
+            self.network.file_data[0][1][f][0]=1*np.abs(gamma_in)**2
+            self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
+            #s22
+            self.network.file_data[1][1][f][0]=np.abs(gamma_in)
+            self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+
     def wavelength(self,frequency):
         self.lambda_line = self.vp_line/frequency
         return self.lambda_line 
     
     def input_z(self,frequency,length,zl):
-        self.lambda_line = self.vp_line/frequency
-        self.length = length
+        lambda_line = self.vp_line/frequency
         self.zl = zl
         if(zl == 0):
-            self.type = "shorted stub"
-            self.z_in = 1j*self.zo*np.tan(((2*np.pi)/self.lambda_line)*length)
+            self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
         elif(zl == np.inf):
-            self.type = "open stub"
-            self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/self.lambda_line)*length))
+            self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/lambda_line)*length))
         else:
-            self.z_in = self.zo*((zl+1j*self.zo*np.tan(((2*np.pi)/self.lambda_line)*length))/(self.zo+1j*zl*np.tan(((2*np.pi)/self.lambda_line)*length)))
+            self.z_in = self.zo*((zl+1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length))/(self.zo+1j*zl*np.tan(((2*np.pi)/lambda_line)*length)))
 
         return self.z_in 
