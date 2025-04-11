@@ -15,8 +15,8 @@ freq = 10E9
 desired_gain = 15
 
 trans_s2p = mt.system_tools.network(file_path=file)
-t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3)
-t_line.create_network(trans_s2p.frequencies,0.1)
+t_line = mt.t_line_tools.microstrip(100,4.4,1.6E-3)
+t_line.create_network(trans_s2p.frequencies,0.12)
 amp_w_line = mt.system_tools.network_cascade(t_line.network,trans_s2p)
 amp = mt.circuit_tools.rf_amplifier(amp_w_line)
 
@@ -42,7 +42,11 @@ print("--- %s seconds ---" % (time.time() - start_time))
 smith = mt.plotting_tools.smith_chart()
 real = [np.real(x) for x in amp.transistor.complex[1][1]]
 imag = [np.imag(x) for x in amp.transistor.complex[1][1]]
+real2 = [np.real(x) for x in t_line.network.complex[0][0]]
+imag2 = [np.imag(x) for x in t_line.network.complex[0][0]]
 smith.ax.plot(real,imag)
+smith.ax.plot(real2,imag2)
+smith.ax.plot(real2[1],imag2[1], marker='o',markersize = 2 ,  linestyle='none')
     #annotate every 1GHz
 point = 0
 for xy in zip(real, imag):  
@@ -59,7 +63,7 @@ plot.grid()
 
 
 fig2, ay = plot.subplots()
-ay.plot(t_line.network.frequencies,t_line.network.phase[1][0])
+ay.plot(t_line.network.frequencies,t_line.network.dbmag[0][0])
 plot.grid()
 plot.show()
 

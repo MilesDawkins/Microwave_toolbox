@@ -54,8 +54,8 @@ class microstrip():
             lambda_freq = self.vp_line/freqs[f]
             beta_freq = (2*np.pi)/lambda_freq
             #s11
-            self.network.file_data[0][0][f][0]=0.00001
-            self.network.file_data[0][0][f][1]=0
+            self.network.file_data[0][0][f][0]=1
+            self.network.file_data[0][0][f][1]=90
             #s21
             self.network.file_data[1][0][f][0]=1
             self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
@@ -63,7 +63,7 @@ class microstrip():
             self.network.file_data[0][1][f][0]=1
             self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
             #s22
-            self.network.file_data[1][1][f][0]=0.00001
+            self.network.file_data[1][1][f][0]=1
             self.network.file_data[1][1][f][1]=0
 
     def wavelength(self,frequency):
