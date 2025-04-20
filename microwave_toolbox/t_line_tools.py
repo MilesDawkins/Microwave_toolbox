@@ -3,15 +3,15 @@ import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t, type = None, zl_in = None):
+    def __init__(self,zo,er,sub_t, typem = None, zl_in = None):
         # create class instance globals
-        if type is None:
-            self.type = "t_line"
+        if typem is None:
+            self.typem = "t_line"
         else:
-            self.type = type
-            if self.type == "open":
-                self.zl = np.inf()
-            elif self.type == "short":
+            self.typem = typem
+            if self.typem == "open":
+                self.zl = np.inf
+            elif self.typem == "short":
                 self.zl = 0
         self.sub_type = "microstrip"
         self.zo=zo
@@ -20,10 +20,7 @@ class microstrip():
             self.zl = np.inf
         else:
             if isinstance(zl_in,list):
-                self.zl = []
-                for item in zl_in:
-                    self.zl.append(item)
-                print(type(self.zl))
+                self.zl = zl_in
             else:
                 self.zl = float(zl_in)
         self.er=er
@@ -68,29 +65,28 @@ class microstrip():
 
     def create_network(self,freqs,length):
         self.length = length
-        if self.type == "t_line":
+        if self.typem == "t_line":
             self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
         else:
             self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
+        
         for f in range(len(freqs)):
             lambda_freq = self.vp_line/freqs[f]
             beta_freq = (2*np.pi)/lambda_freq
 
-            if self.type == "t_line":
+            if self.typem == "t_line":
                 if self.zo != 50:
                     gamma_in = (self.zo-50)/(self.zo+50)
                 else:
                     gamma_in = 1E-12
             else: 
-                
                 if isinstance(self.zl,float) or isinstance(self.zl,int) == 1:
                     gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
                 else:
-                    z=self.zl
-                    gamma_in = (self.input_z(freqs[f],self.length,z)-50)/(self.input_z(freqs[f],self.length,z)+50)
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
             
 
-            if self.type == "t_line":
+            if self.typem == "t_line":
                 #s11
                 self.network.file_data[0][0][f][0]=np.abs(gamma_in)
                 self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
@@ -114,7 +110,7 @@ class microstrip():
     
     def input_z(self,frequency,length,zl):
         lambda_line = self.vp_line/frequency
-        self.zl = zl
+        
         if(zl == 0):
             self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
         elif(zl == np.inf):
