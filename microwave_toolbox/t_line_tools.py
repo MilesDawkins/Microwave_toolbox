@@ -3,15 +3,29 @@ import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t, type = None):
+    def __init__(self,zo,er,sub_t, type = None, zl_in = None):
         # create class instance globals
         if type is None:
             self.type = "t_line"
         else:
             self.type = type
+            if self.type == "open":
+                self.zl = np.inf()
+            elif self.type == "short":
+                self.zl = 0
         self.sub_type = "microstrip"
         self.zo=zo
-        self.zl = np.inf
+
+        if zl_in is None:
+            self.zl = np.inf
+        else:
+            if isinstance(zl_in,list):
+                self.zl = []
+                for item in zl_in:
+                    self.zl.append(item)
+                print(type(self.zl))
+            else:
+                self.zl = float(zl_in)
         self.er=er
         self.ereff = 0
         self.sub_t=sub_t
@@ -67,11 +81,13 @@ class microstrip():
                     gamma_in = (self.zo-50)/(self.zo+50)
                 else:
                     gamma_in = 1E-12
-            elif self.type == "short":
-                gamma_in = (self.input_z(freqs[f],self.length,0)-50)/(self.input_z(freqs[f],self.length,0)+50)
-            elif self.type == "open":
-                gamma_in = (self.input_z(freqs[f],self.length,np.inf)-50)/(self.input_z(freqs[f],self.length,np.inf)+50)
-
+            else: 
+                
+                if isinstance(self.zl,float) or isinstance(self.zl,int) == 1:
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
+                else:
+                    z=self.zl
+                    gamma_in = (self.input_z(freqs[f],self.length,z)-50)/(self.input_z(freqs[f],self.length,z)+50)
             
 
             if self.type == "t_line":
