@@ -20,29 +20,57 @@ class network():
             self.z_reference = 50
             self.reversed = False
 
+            #Check input argumentts and intitalize accordingly
             if format is not None:
                 self.format = format
-            #Check input argumentts and intitalize accordingly
+
             if num_ports is not None:
                 self.num_ports = num_ports
-                for i in range(self.num_ports):
-                    self.file_data.append([[]])
-                    for j in range(self.num_ports-1):
-                        self.file_data[i].append([])          
+                if num_ports != 1:
+                    for i in range(self.num_ports):
+                        self.file_data.append([[None,None]])
+                        for j in range(self.num_ports-1):
+                            self.file_data[i].append([None,None])
+                else:
+                    self.file_data = None
+                    self.file_data = [[None,None]]                  
             else:
                 self.num_ports = 0
 
+
             if frequencies is not None:
                 self.frequencies = frequencies
-                for i in range(self.num_ports):
-                    for j in range(self.num_ports): 
-                        for f in range(len(frequencies)):
-                            if s_user is not None:
-                                self.file_data[i][j].append(s_user[i][j][f])
-                            else:
-                                self.file_data[i][j].append([None,None])
-                            
+                if num_ports != 1:
+                    for i in range(self.num_ports):
+                        for j in range(self.num_ports): 
+                            for f in range(len(frequencies)):
+                                if f == 0:
+                                    if s_user is not None:
+                                        self.file_data[i][j]=s_user[i][j][0]
+                                    else:
+                                       
+                                        self.file_data[i][j]=[[None,None]]
+                                        
+                                else:
+                                    if s_user is not None:
+                                        self.file_data[i][j].append(s_user[i][j][f])
+                                    else:
+                                        self.file_data[i][j].append([None,None])
 
+                else:
+                    for f in range(len(frequencies)):
+                        if f == 0:
+                            if s_user is not None:
+                                self.file_data[0]=[s_user[f]]
+                            else:
+                                self.file_data[0]=[None,None]
+                        else:
+                            if s_user is not None:
+                                self.file_data.append(s_user[f])
+                            else:
+                                self.file_data.append([None,None])
+                            
+            
             if file_path is not None:
                 file_path = file_path.replace("\\", "/")
                 self.file_path = file_path
@@ -145,64 +173,91 @@ class network():
 
     def calc_dbmag(self):
         temp = [[[]]]
-        for i in range(self.num_ports):
-            temp.append([[]])
-            for j in range(self.num_ports):
-                temp[i].append([])
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
 
-        for i in range(self.num_ports):
-              for j in range(self.num_ports): 
-                if self.format == "DB":  
-                    temp[i][j] = ([x[0] for x in self.file_data[i][j]])
-                elif self.format == "RI":  
-                    temp[i][j] = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data[i][j]])
-                elif self.format == "MA":  
-                    temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
+            for i in range(self.num_ports):
+                for j in range(self.num_ports): 
+                    if self.format == "DB":  
+                        temp[i][j] = ([x[0] for x in self.file_data[i][j]])
+                    elif self.format == "RI":  
+                        temp[i][j] = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data[i][j]])
+                    elif self.format == "MA":  
+                        temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
+        else:
+            temp = []
+            if self.format == "DB":  
+                temp = ([x[0] for x in self.file_data])
+            elif self.format == "RI":  
+                temp = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data])
+            elif self.format == "MA":  
+                temp = ([20*np.log10(x[0]) for x in self.file_data])
         return temp
     
     def calc_linmag(self):
         temp = [[[]]]
-        for i in range(self.num_ports):
-            temp.append([[]])
-            for j in range(self.num_ports):
-                temp[i].append([])
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
 
-        for i in range(self.num_ports):
-              for j in range(self.num_ports):
-                if self.format == "DB":  
-                    temp[i][j] = ([10**(x[0]/20) for x in self.file_data[i][j]])
-                elif self.format == "RI":  
-                    temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
-                elif self.format == "MA":  
-                    temp[i][j] = [x[0] for x in self.file_data[i][j]] 
-
+            for i in range(self.num_ports):
+                for j in range(self.num_ports):
+                    if self.format == "DB":  
+                        temp[i][j] = ([10**(x[0]/20) for x in self.file_data[i][j]])
+                    elif self.format == "RI":  
+                        temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
+                    elif self.format == "MA":  
+                        temp[i][j] = [x[0] for x in self.file_data[i][j]] 
+        else:
+            temp = [None]
+            if self.format == "DB":  
+                temp = ([10**(x[0]/20) for x in self.file_data])
+            elif self.format == "RI":  
+                temp = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data])
+            elif self.format == "MA":  
+                temp = [x[0] for x in self.file_data[i][j]] 
         return temp
     
     def calc_phase(self):
         temp = [[[]]]
-        for i in range(self.num_ports):
-            temp.append([[]])
-            for j in range(self.num_ports):
-                temp[i].append([])
-                
-        for i in range(self.num_ports):
-              for j in range(self.num_ports): 
-                if self.format == "DB":  
-                    temp[i][j] = ([x[1] for x in self.file_data[i][j]])
-                elif self.format == "RI":  
-                    temp[i][j] = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data[i][j]]
-                elif self.format == "MA":  
-                    temp[i][j] = ([x[1] for x in self.file_data[i][j]])
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
+                    
+            for i in range(self.num_ports):
+                for j in range(self.num_ports): 
+                    if self.format == "DB":  
+                        temp[i][j] = ([x[1] for x in self.file_data[i][j]])
+                    elif self.format == "RI":  
+                        temp[i][j] = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data[i][j]]
+                    elif self.format == "MA":  
+                        temp[i][j] = ([x[1] for x in self.file_data[i][j]])
+        else:
+            temp = [None]
+            if self.format == "DB":  
+                temp = ([x[1] for x in self.file_data])
+            elif self.format == "RI":  
+                temp = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data]
+            elif self.format == "MA":  
+                temp = ([x[1] for x in self.file_data])
         return temp
     
     def calc_complex(self):
         temp = [[[]]]
-        for i in range(self.num_ports):
-            temp.append([[]])
-            for j in range(self.num_ports):
-                temp[i].append([])
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
 
-        for i in range(self.num_ports):
+            for i in range(self.num_ports):
               for j in range(self.num_ports): 
                 if self.format == "DB":  
                     temp[i][j] = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data[i][j]]
@@ -210,6 +265,16 @@ class network():
                     temp[i][j] = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
                 elif self.format == "MA": 
                     temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
+        else:
+            temp = [None]
+            if self.format == "DB":  
+                temp = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data]
+            elif self.format == "RI":  
+                temp = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
+            elif self.format == "MA": 
+                temp = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data])
+
+        
         return temp
     
     def calc_impedance(self,freq):

@@ -54,32 +54,43 @@ class microstrip():
 
     def create_network(self,freqs,length):
         self.length = length
-        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        if self.type == "t_line":
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        else:
+            self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
         for f in range(len(freqs)):
             lambda_freq = self.vp_line/freqs[f]
             beta_freq = (2*np.pi)/lambda_freq
 
-            if self.type is "t_line":
+            if self.type == "t_line":
                 if self.zo != 50:
                     gamma_in = (self.zo-50)/(self.zo+50)
                 else:
                     gamma_in = 1E-12
-            elif self.type is "short":
+            elif self.type == "short":
                 gamma_in = (self.input_z(freqs[f],self.length,0)-50)/(self.input_z(freqs[f],self.length,0)+50)
-            elif self.type is "open":
+            elif self.type == "open":
                 gamma_in = (self.input_z(freqs[f],self.length,np.inf)-50)/(self.input_z(freqs[f],self.length,np.inf)+50)
-            #s11
-            self.network.file_data[0][0][f][0]=np.abs(gamma_in)
-            self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
-            #s21
-            self.network.file_data[1][0][f][0]=1*np.abs(gamma_in)**2
-            self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
-            #s12
-            self.network.file_data[0][1][f][0]=1*np.abs(gamma_in)**2
-            self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
-            #s22
-            self.network.file_data[1][1][f][0]=np.abs(gamma_in)
-            self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+
+            
+
+            if self.type == "t_line":
+                #s11
+                self.network.file_data[0][0][f][0]=np.abs(gamma_in)
+                self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
+                #s21
+                self.network.file_data[1][0][f][0]=1
+                self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
+                #s12
+                self.network.file_data[0][1][f][0]=1
+                self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
+                #s22
+                self.network.file_data[1][1][f][0]=np.abs(gamma_in)
+                self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+            else:
+                #s11
+                self.network.file_data[f][0]=np.abs(gamma_in)
+                self.network.file_data[f][1]=(180/np.pi)*cm.phase(gamma_in)
 
     def wavelength(self,frequency):
         self.lambda_line = self.vp_line/frequency

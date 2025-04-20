@@ -15,21 +15,21 @@ freqs = np.linspace(1E9,10E9,1000)
 
 t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, type = "open")
 t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3)
-t_line.create_network(freqs,1E-2)
-t_line_2.create_network(freqs,1E-2)
-t_cascade = mt.system_tools.network_cascade(t_line_2.network,t_line.network)
-
+t_line.create_network(freqs,2E-2)
+t_line_2.create_network(freqs,2E-2)
+#t_cascade = mt.system_tools.network_cascade(t_line_2.network,t_line.network)
+plot.plot(t_line.network.frequencies,t_line.network.phase)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
 
 ##################plotting functions#######################
-smith = mt.plotting_tools.smith_chart()
-real = [np.real(x) for x in t_cascade.complex[0][0]]
-imag = [np.imag(x) for x in t_cascade.complex[0][0]]
+#smith = mt.plotting_tools.smith_chart()
+real = [np.real(x) for x in t_line.network.complex]
+imag = [np.imag(x) for x in t_line.network.complex]
 #smith.ax.plot(real,imag)
-smith.ax.plot(real,imag)
+#smith.ax.plot(real,imag)
 
 """
     #annotate every 1GHz
@@ -45,8 +45,7 @@ plot.grid()
 
 
 
-fig2, ay = plot.subplots()
-ay.plot(t_cascade.frequencies,t_cascade.dbmag[0][0])
+#fig2, ay = plot.subplots()
 plot.grid()
 plot.show()
 
