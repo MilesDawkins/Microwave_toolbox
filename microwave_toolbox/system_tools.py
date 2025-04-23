@@ -86,6 +86,8 @@ class network():
             self.phase = self.calc_phase()
         if attr=="complex":
             self.complex = self.calc_complex()
+        if attr=="impedance":
+            self.impedance = self.calc_input_impedance()
         return super(network, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
@@ -277,12 +279,22 @@ class network():
         
         return temp
     
-    def calc_impedance(self,freq):
-        gamma_11 = np.interp(freq,self.frequencies,self.complex[0][0])
-        z_s11 = self.z_reference*((-1-gamma_11)/(gamma_11-1))
-        gamma_22 = np.interp(freq,self.frequencies,self.complex[1][1])
-        z_s22 = self.z_reference*((-1-gamma_22)/(gamma_22-1))
-        return z_s11,z_s22
+    def calc_input_impedance(self):
+        temp = [[[]]]
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
+
+            for i in range(self.num_ports):
+                temp[i][i] = [self.z_reference*((1+x)/(1-x)) for x in self.complex[i][i]]
+               
+        else:
+            temp = [None]
+            temp = [self.z_reference*((1+x)/(1-x)) for x in self.complex]
+        
+        return temp
 
 def reverse_network(s1: network):
    temp1 =  s1.file_data[0][0]

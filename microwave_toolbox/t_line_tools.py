@@ -5,6 +5,9 @@ from . import system_tools
 class microstrip():
     def __init__(self,zo,er,sub_t, typem = None, zl_in = None):
         # create class instance globals
+
+        self.zl = np.inf
+
         if typem is None:
             self.typem = "t_line"
         else:
@@ -13,21 +16,18 @@ class microstrip():
                 self.zl = np.inf
             elif self.typem == "short":
                 self.zl = 0
+
+
+        if zl_in is not None:
+            self.zl = zl_in     
+
         self.sub_type = "microstrip"
         self.zo=zo
-
-        if zl_in is None:
-            self.zl = np.inf
-        else:
-            if isinstance(zl_in,list):
-                self.zl = zl_in
-            else:
-                self.zl = float(zl_in)
         self.er=er
         self.ereff = 0
         self.sub_t=sub_t
         self.length = 0
-        self.z_in = np.inf
+       
         
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
@@ -80,7 +80,7 @@ class microstrip():
                 else:
                     gamma_in = 1E-12
             else: 
-                if isinstance(self.zl,float) or isinstance(self.zl,int) == 1:
+                if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
                     gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
                 else:
                     gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
@@ -115,6 +115,7 @@ class microstrip():
             self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
         elif(zl == np.inf):
             self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/lambda_line)*length))
+            
         else:
             self.z_in = self.zo*((zl+1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length))/(self.zo+1j*zl*np.tan(((2*np.pi)/lambda_line)*length)))
 

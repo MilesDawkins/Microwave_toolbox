@@ -15,17 +15,18 @@ freqs = np.linspace(1E6,10E9,1000)
 stub_load = [1/(1j*2*np.pi*x*10E-12) for x in freqs]
 
 t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "open")
-t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 0)
-t_line.create_network(freqs,10E-3)
-t_line_2.create_network(freqs,10E-3)
+t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 115)
+t_line.create_network(freqs,21.3E-3)
+t_line_2.create_network(freqs,8.649E-3)
 z=[]
+print(t_line.ereff)
 for f in range(len(freqs)):
-    z.append(1/(1/t_line.network.complex[f]+1/t_line_2.network.complex[f]))
+    z.append(1/(1/t_line.network.impedance[f]+1/t_line_2.network.impedance[f]))
 #t_cascade = mt.system_tools.network_cascade(t_line_2.network,t_line.network)
-plot.plot(t_line.network.frequencies,[20*np.log10(np.sqrt(np.real(x)**2+np.imag(x)**2)) for x in z])
+plot.plot(t_line.network.frequencies,[20*np.log10(np.abs((x-50)/(x+50))) for x in z])
 print("--- %s seconds ---" % (time.time() - start_time))
 
-
+90
 
 
 ##################plotting functions#######################
