@@ -11,7 +11,7 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E6,10E9,1000)
+freqs = np.linspace(1E9,40E9,1000)
 stub_load = [1/(1j*2*np.pi*x*10E-12) for x in freqs]
 
 t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "open")
@@ -35,15 +35,15 @@ imag = [np.imag(x) for x in z_gamma]
 smith.ax.plot(real,imag)
 #smith.ax.plot(real,imag)
 
-"""
+
     #annotate every 1GHz
 point = 0
 for xy in zip(real, imag):  
-    if amp.frequencies[point]%1E9 == 0:
-        smith.ax.annotate('(%s)' % (amp.frequencies[point]/1E9), xy=xy, textcoords='data') 
-        smith.ax.plot(real2[point],imag2[point], marker='o',markersize = 2 , c='black', linestyle='none')
+    if t_line.network.frequencies[point]%1E9 == 0:
+        smith.ax.annotate('(%s)' % (t_line.network.frequencies[point]/1E9), xy=xy, textcoords='data') 
+        smith.ax.plot(real[point],imag[point], marker='o',markersize = 2 , c='black', linestyle='none')
     point = point + 1
-"""
+
 
 plot.grid()
 
