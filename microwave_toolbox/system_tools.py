@@ -306,7 +306,9 @@ def reverse_network(s1: network):
    s1.reversed = True
 
 def network_cascade(s1: network,s2: network, interp_freq_step = None):
-    
+    if s1.num_ports == 1:
+        SyntaxError("Cannot series cascade a 1 port onto another network, reverse order of inputs or check input network parameters")
+
     if  interp_freq_step == None:
         interp_freq_step = 10E6
     #determine frequencies that cascade can be performed
@@ -316,49 +318,61 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
     
 
     #initialize return matrix
-    s_c = network(num_ports=2,frequencies=freq)
+    if s2.num_ports == 1:
+        s_c = network(num_ports=1,frequencies=freq)
+    else:
+        s_c = network(num_ports=2,frequencies=freq)
                                
     #interpolate frequency points and convert both sparametrs to ABCD parameters
     for f in range(len(s_c.frequencies)):
+        s_c.format = "RI"
 
         #interpolate value at frequency point
         s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][0])
         s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][1])
         s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][0])
         s22_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][1])
+           
+        if s2.num_ports == 1:
+            
+            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex)
+            temp = s11_1 + ((s21_1*s12_1*s11_2)/(1-s22_1*s11_2))
+            s_c.file_data[f]=[np.real(temp), np.imag(temp)]
+            
+        if s2.num_ports == 2:
+            
+            #interpolate value at frequency point
+            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][0])
+            s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][1])
+            s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][0])
+            s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][1])
+            
+            #convert to ABCD parametersS
+            a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
+            b1=(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
+            c1=((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
+            d1=(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
 
-        s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][0])
-        s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][1])
-        s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][0])
-        s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][1])
-        
-        #convert to ABCD parametersS
-        a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
-        b1=(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
-        c1=((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
-        d1=(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
+            a2=(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
+            b2=(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
+            c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
+            d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
+            
+            #cascade network parameters using matrix multiplication
+            a_c=(a1*a2+b1*c2)
+            b_c=(a1*b2+b1*d2)
+            c_c=(c1*a2+d1*c2)
+            d_c=(c1*b2+d1*d2)
 
-        a2=(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
-        b2=(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
-        c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
-        d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
-         
-        #cascade network parameters using matrix multiplication
-        a_c=(a1*a2+b1*c2)
-        b_c=(a1*b2+b1*d2)
-        c_c=(c1*a2+d1*c2)
-        d_c=(c1*b2+d1*d2)
-
-        #convert cascaded network ABCD aprameters back to s parameters
-        s_c.format = "RI"
-        temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
-        s_c.file_data[0][0][f]=[np.real(temp), np.imag(temp)]
-        temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-        s_c.file_data[0][1][f]=[np.real(temp), np.imag(temp)]
-        temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-        s_c.file_data[1][0][f]=[np.real(temp), np.imag(temp)]
-        temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-        s_c.file_data[1][1][f]=[np.real(temp), np.imag(temp)]
+            #convert cascaded network ABCD aprameters back to s parameters
+            temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
+            s_c.file_data[0][0][f]=[np.real(temp), np.imag(temp)]
+            temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+            s_c.file_data[0][1][f]=[np.real(temp), np.imag(temp)]
+            temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+            s_c.file_data[1][0][f]=[np.real(temp), np.imag(temp)]
+            temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+            s_c.file_data[1][1][f]=[np.real(temp), np.imag(temp)]
 
     #convert result to all other network forms
 

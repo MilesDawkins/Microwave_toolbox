@@ -15,18 +15,25 @@ freqs = np.linspace(1E9,40E9,1000)
 stub_load = [1/(1j*2*np.pi*x*10E-12) for x in freqs]
 
 t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "open")
-t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 115)
+t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 100)
+t_line_3 = mt.t_line_tools.microstrip(50,4.4,1.6E-3)
+
 t_line.create_network(freqs,21.3E-3)
 t_line_2.create_network(freqs,8.649E-3)
+t_line_3.create_network(freqs,8.649E-3)
 z=[]
+print(t_line_3.network.num_ports)
+t_line_cascade = mt.system_tools.network_cascade(t_line_3.network,t_line_2.network)
+
 print(t_line.ereff)
 for f in range(len(freqs)):
     z.append(1/(1/t_line.network.impedance[f]+1/t_line_2.network.impedance[f]))
 z_gamma = [(x-50)/(x+50) for x in z]
 #t_cascade = mt.system_tools.network_cascade(t_line_2.network,t_line.network)
-plot.plot(t_line.network.frequencies,[20*np.log10(abs(x)) for x in z_gamma])
+#plot.plot(t_line.network.frequencies,[20*np.log10(abs(x)) for x in z_gamma])
+plot.plot(t_line_cascade.frequencies,t_line_cascade.dbmag)
 print("--- %s seconds ---" % (time.time() - start_time))
-
+plot.ylim([-80,0])
 
 ##################plotting functions#######################
 smith = mt.plotting_tools.smith_chart()

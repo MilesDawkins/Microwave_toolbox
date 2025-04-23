@@ -17,7 +17,6 @@ class microstrip():
             elif self.typem == "short":
                 self.zl = 0
 
-
         if zl_in is not None:
             self.zl = zl_in     
 
