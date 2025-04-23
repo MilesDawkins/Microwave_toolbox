@@ -27,8 +27,6 @@ z_gamma = [(x-50)/(x+50) for x in z]
 plot.plot(t_line.network.frequencies,[20*np.log10(abs(x)) for x in z_gamma])
 print("--- %s seconds ---" % (time.time() - start_time))
 
-90
-
 
 ##################plotting functions#######################
 smith = mt.plotting_tools.smith_chart()
