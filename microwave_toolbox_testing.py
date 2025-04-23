@@ -22,8 +22,9 @@ z=[]
 print(t_line.ereff)
 for f in range(len(freqs)):
     z.append(1/(1/t_line.network.impedance[f]+1/t_line_2.network.impedance[f]))
+z_gamma = [(x-50)/(x+50) for x in z]
 #t_cascade = mt.system_tools.network_cascade(t_line_2.network,t_line.network)
-plot.plot(t_line.network.frequencies,[20*np.log10(np.abs((x-50)/(x+50))) for x in z])
+plot.plot(t_line.network.frequencies,[20*np.log10(abs(x)) for x in z_gamma])
 print("--- %s seconds ---" % (time.time() - start_time))
 
 90
@@ -31,8 +32,8 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 ##################plotting functions#######################
 smith = mt.plotting_tools.smith_chart()
-real = [np.real(x) for x in z]
-imag = [np.imag(x) for x in z]
+real = [np.real(x) for x in z_gamma]
+imag = [np.imag(x) for x in z_gamma]
 smith.ax.plot(real,imag)
 #smith.ax.plot(real,imag)
 
