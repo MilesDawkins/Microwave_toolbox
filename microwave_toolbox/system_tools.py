@@ -270,7 +270,7 @@ class network():
             if self.format == "DB":  
                 temp = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data]
             elif self.format == "RI":  
-                temp = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
+                temp = [x[0] + 1j*x[1] for x in self.file_data]
             elif self.format == "MA": 
                 temp = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data])
 

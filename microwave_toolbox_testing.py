@@ -15,7 +15,7 @@ freqs = np.linspace(1E6,10E9,1000)
 stub_load = [1/(1j*2*np.pi*x*10E-12) for x in freqs]
 
 t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "open")
-t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 14)
+t_line_2 = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "loaded", zl_in = 0)
 t_line.create_network(freqs,10E-3)
 t_line_2.create_network(freqs,10E-3)
 z=[]
