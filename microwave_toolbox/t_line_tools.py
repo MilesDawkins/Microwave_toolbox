@@ -3,7 +3,7 @@ import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t, typem = None, zl_in = None):
+    def __init__(self,zo,er,sub_t,length,freqs_in = None, shunt_in = None, typem = None, zl_in = None):
         # create class instance globals
 
         self.zl = np.inf
@@ -25,12 +25,13 @@ class microstrip():
         self.er=er
         self.ereff = 0
         self.sub_t=sub_t
-        self.length = 0
+        self.length = length
        
         
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
-        
+        if freqs_in is not None:
+            self.create_network(freqs_in,self.length,shunt = shunt_in)
 
     def microstrip_calc(self,zo_in,er,sub_t):
 

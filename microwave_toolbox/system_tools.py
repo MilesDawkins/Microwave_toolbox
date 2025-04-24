@@ -176,6 +176,9 @@ class network():
         return
 
     def calc_dbmag(self):
+        if self.format == "ABCD":
+            self.__getattr__("complex")
+            self.format == "RI"
         temp = [[[]]]
         if self.num_ports != 1:
             for i in range(self.num_ports):
@@ -202,6 +205,9 @@ class network():
         return temp
     
     def calc_linmag(self):
+        if self.format == "ABCD":
+            self.__getattr__("complex")
+            self.format == "RI"
         temp = [[[]]]
         if self.num_ports != 1:
             for i in range(self.num_ports):
@@ -228,6 +234,9 @@ class network():
         return temp
     
     def calc_phase(self):
+        if self.format == "ABCD":
+            self.__getattr__("complex")
+            self.format == "RI"
         temp = [[[]]]
         if self.num_ports != 1:
             for i in range(self.num_ports):
@@ -282,6 +291,9 @@ class network():
         return temp
     
     def calc_input_impedance(self):
+        if self.format == "ABCD":
+            self.__getattr__("complex")
+            self.format == "RI"
         temp = [[[]]]
         if self.num_ports != 1:
             for i in range(self.num_ports):
@@ -318,7 +330,7 @@ class network():
         
         return temp
     
-    def abcd_to_s(self): 
+    def abcd_to_complex_s(self): 
         #should look into storing ABCD in file data, then mas convertin each parameter over each frequency
         for f in range(self.frequencies):
             temp = (((self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)-(self.abcd[1][0][f]*self.z_reference)-self.abcd[1][1][f])/(self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)+(self.abcd[1][0][f]*self.z_reference)+self.abcd[1][1][f])))

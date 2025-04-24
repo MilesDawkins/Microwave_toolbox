@@ -14,17 +14,14 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 freqs = np.linspace(1E9,10E9,1000)
 stub_load = [1/(1j*2*np.pi*x*10E-12) for x in freqs]
 
-t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3, typem = "open")
-t_line_s = mt.t_line_tools.microstrip(25,1,1.6E-3, typem = "short")
-t_line_2 = mt.t_line_tools.microstrip(70.7,4.4,1.6E-3, typem = "loaded", zl_in = 100)
-t_line_3 = mt.t_line_tools.microstrip(100,1,1.6E-3)
+print(mt.antenna_tools.fspl_calc(2.1E9,102,dist_units="inches"))
 
-t_line.create_network(freqs,21.3E-3)
-t_line_s.create_network(freqs,37.5E-3,shunt = True)
-t_line_2.create_network(freqs,10E-3)
-t_line_3.create_network(freqs,20E-3)
+t_line = mt.t_line_tools.microstrip(50,4.4,1.6E-3,21.3E-3,freqs_in = freqs, typem = "open")
+t_line_s = mt.t_line_tools.microstrip(25,1,1.6E-3,37.5E-3,freqs_in=freqs, typem = "short", shunt_in=True)
+t_line_2 = mt.t_line_tools.microstrip(70.7,4.4,1.6E-3,10E-3, freqs_in=freqs, typem = "loaded", zl_in = 100)
+t_line_3 = mt.t_line_tools.microstrip(100,1,1.6E-3,20E-3,freqs_in = freqs)
 
-t_line_cascade = mt.system_tools.network_cascade(t_line_3.network,t_line_2.network)
+
 shunt_t_line_cascade = mt.system_tools.network_cascade(t_line_3.network,t_line_s.network)
 shunt_t_line_cascade = mt.system_tools.network_cascade(shunt_t_line_cascade,t_line_3.network)
 
