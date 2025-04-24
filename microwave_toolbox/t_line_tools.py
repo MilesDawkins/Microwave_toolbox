@@ -47,7 +47,6 @@ class microstrip():
             self.width=sub_t*wsd1
             wsdf=wsd1
         elif(wsd1>=2):
-            print(wsd2)
             self.width=sub_t*wsd2
             wsdf=wsd2
         
@@ -87,6 +86,7 @@ class microstrip():
                 adm = (1/self.input_z(freqs[f],self.length,self.zl))/(1/50)
                 gamma_in = -1*(adm/(adm+2))
                 gamma_thru = (2/(adm+2))
+                
                 
             else: 
                 if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
