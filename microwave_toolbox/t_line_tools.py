@@ -81,21 +81,6 @@ class microstrip():
                 else:
                     gamma_in = 1E-12
 
-            elif shunt:
-                #reference for this eq: http://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_III_-_Networks_(Steer)/02%3A_Chapter_2/2.5%3A_Scattering_Parameter_Matrices_of_Common_Two-Ports
-                adm = (1/self.input_z(freqs[f],self.length,self.zl))/(1/50)
-                gamma_in = -1*(adm/(adm+2))
-                gamma_thru = (2/(adm+2))
-                
-                
-            else: 
-                if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
-                    gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
-                else:
-                    gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
-            
-
-            if self.typem == "t_line":
                 #s11
                 self.network.file_data[0][0][f][0]=np.abs(gamma_in)
                 self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
@@ -110,19 +95,30 @@ class microstrip():
                 self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
 
             elif shunt:
-                 #s11
-                 self.network.file_data[0][0][f]=[np.real(gamma_in), np.imag(gamma_in)]
-                 #s21
-                 self.network.file_data[1][0][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
-                 #s12
-                 self.network.file_data[0][1][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
-                 #s22
-                 self.network.file_data[1][1][f]=[np.real(gamma_in), np.imag(gamma_in)]
+                #reference for this eq: http://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_III_-_Networks_(Steer)/02%3A_Chapter_2/2.5%3A_Scattering_Parameter_Matrices_of_Common_Two-Ports
+                adm = (1/self.input_z(freqs[f],self.length,self.zl))/(1/50)
+                gamma_in = -1*(adm/(adm+2))
+                gamma_thru = (2/(adm+2))
 
-            else:
+                #s11
+                self.network.file_data[0][0][f]=[np.real(gamma_in), np.imag(gamma_in)]
+                #s21
+                self.network.file_data[1][0][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
+                 #s12
+                self.network.file_data[0][1][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
+                 #s22
+                self.network.file_data[1][1][f]=[np.real(gamma_in), np.imag(gamma_in)]
+                
+                
+            else: 
+                if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
+                else:
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
                 #s11
                 self.network.file_data[f][0]=np.abs(gamma_in)
                 self.network.file_data[f][1]=(180/np.pi)*cm.phase(gamma_in)
+               
 
     def wavelength(self,frequency):
         self.lambda_line = self.vp_line/frequency
