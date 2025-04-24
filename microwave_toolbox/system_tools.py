@@ -88,6 +88,8 @@ class network():
             self.complex = self.calc_complex()
         if attr=="impedance":
             self.impedance = self.calc_input_impedance()
+        if attr=="abcd":
+            self.abcd = self.calc_abcd()
         return super(network, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
@@ -295,6 +297,39 @@ class network():
             temp = [self.z_reference*((1+x)/(1-x)) for x in self.complex]
         
         return temp
+    
+    def calc_abcd(self):
+        #currently relies on complex data being available
+        temp = [[[]]]
+        if self.num_ports != 1:
+            for i in range(self.num_ports):
+                temp.append([[]])
+                for j in range(self.num_ports):
+                    temp[i].append([])
+            
+            for f in range(self.frequencies):
+                temp[0][0][f]=(((1+self.complex[0][0][f])*(1-self.complex[1][1][f])+(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
+                temp[0][1][f]=(self.z_reference*((1+self.complex[0][0][f])*(1+self.complex[1][1][f])-(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
+                temp[1][0][f]=((1/self.z_reference)*((1-self.complex[0][0][f])*(1-self.complex[1][1][f])-(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
+                temp[1][1][f]=(((1-self.complex[0][0][f])*(1+self.complex[1][1][f])+(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
+               
+        else:
+            SyntaxError("Cannot compute ABCD for 1 port networks, consider changing to shunt element")
+        
+        return temp
+    
+    def abcd_to_s(self): 
+        for f in range(self.frequencies):
+            temp = (((self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)-(self.abcd[1][0][f]*self.z_reference)-self.abcd[1][1][f])/(self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)+(self.abcd[1][0][f]*self.z_reference)+self.abcd[1][1][f])))
+            self.complex[0][0].append([np.real(temp), np.imag(temp)])
+            temp = (((2*(self.abcd[0][0][f]*self.abcd[1][1][f]-self.abcd[0][1][f]*self.abcd[1][0][f]))/(self.abcd[0][0][f]+self.abcd[0][1][f]/self.z_reference+self.abcd[1][0][f]*self.z_reference+self.abcd[1][1][f])))
+            self.complex[0][1].append([np.real(temp), np.imag(temp)])
+            temp = ((2/(self.abcd[0][0][f]+self.abcd[0][1][f]/self.z_reference+self.abcd[1][0][f]*self.z_reference+self.abcd[1][1][f])))
+            self.complex[1][0].append([np.real(temp), np.imag(temp)])
+            temp = (((-self.abcd[0][0][f]+self.abcd[0][1][f]/self.z_reference-self.abcd[1][0][f]*self.z_reference+self.abcd[1][1][f])/(self.abcd[0][0][f]+self.abcd[0][1][f]/self.z_reference+self.abcd[1][0][f]*self.z_reference+self.abcd[1][1][f])))
+            self.complex[1][1].append([np.real(temp), np.imag(temp)])
+       
+        
 
 def reverse_network(s1: network):
    temp1 =  s1.file_data[0][0]
