@@ -62,10 +62,12 @@ class microstrip():
         # calculate parameters of waves on line
         self.vp_line=299792458/np.sqrt(self.ereff)
 
-    def create_network(self,freqs,length):
+    def create_network(self,freqs,length, shunt = None):
         self.length = length
         if self.typem == "t_line":
             self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        elif shunt:
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='RI')
         else:
             self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
         
@@ -78,6 +80,13 @@ class microstrip():
                     gamma_in = (self.zo-50)/(self.zo+50)
                 else:
                     gamma_in = 1E-12
+
+            elif shunt:
+                #reference for this eq: http://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_III_-_Networks_(Steer)/02%3A_Chapter_2/2.5%3A_Scattering_Parameter_Matrices_of_Common_Two-Ports
+                adm = (1/self.input_z(freqs[f],self.length,self.zl))/(1/50)
+                gamma_in = -1*(adm/(adm+2))
+                gamma_thru = (2/(adm+2))
+                
             else: 
                 if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
                     gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
@@ -98,6 +107,17 @@ class microstrip():
                 #s22
                 self.network.file_data[1][1][f][0]=np.abs(gamma_in)
                 self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+
+            elif shunt:
+                 #s11
+                 self.network.file_data[0][0][f]=[np.real(gamma_in), np.imag(gamma_in)]
+                 #s21
+                 self.network.file_data[1][0][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
+                 #s12
+                 self.network.file_data[0][1][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
+                 #s22
+                 self.network.file_data[1][1][f]=[np.real(gamma_in), np.imag(gamma_in)]
+
             else:
                 #s11
                 self.network.file_data[f][0]=np.abs(gamma_in)
