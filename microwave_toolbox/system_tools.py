@@ -319,6 +319,7 @@ class network():
         return temp
     
     def abcd_to_s(self): 
+        #should look into storing ABCD in file data, then mas convertin each parameter over each frequency
         for f in range(self.frequencies):
             temp = (((self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)-(self.abcd[1][0][f]*self.z_reference)-self.abcd[1][1][f])/(self.abcd[0][0][f]+(self.abcd[0][1][f]/self.z_reference)+(self.abcd[1][0][f]*self.z_reference)+self.abcd[1][1][f])))
             self.complex[0][0].append([np.real(temp), np.imag(temp)])
