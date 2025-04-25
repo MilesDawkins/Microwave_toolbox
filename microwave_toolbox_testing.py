@@ -11,29 +11,48 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E9,11E9,1000)
+freqs = np.linspace(1E9,12E9,1000)
+gain_req = 6
 
 bjt = mt.system_tools.network(file)
+amp_calc = mt.circuit_tools.rf_amplifier(bjt)
 
-t_line_s = mt.t_line_tools.microstrip(50,1,1.6E-3,10E-3,freqs_in = freqs, typem= "loaded", zl_in=1000, shunt_in=True)
-t_line = mt.t_line_tools.microstrip(50,1,1.6E-3,20E-3,freqs_in = freqs)
+trans_gain = 10*np.log10(np.interp(10E9,amp_calc.frequencies,amp_calc.max_transducer_gain))
+match_gain = gain_req - trans_gain
+sc,sr,lc,lr, min_gs, min_gl = amp_calc.calc_gain_circle(match_gain/2,10E9)
+totalgain = trans_gain + match_gain
+print(trans_gain)
+print(totalgain)
+print(min_gs)
+print(min_gl)
 
-shunt_t_line_cascade = mt.system_tools.network_cascade(t_line.network,t_line_s.network)
-shunt_t_line_cascade = mt.system_tools.network_cascade(shunt_t_line_cascade,t_line.network)
-amp = mt.system_tools.network_cascade(bjt,shunt_t_line_cascade)
+microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
+lamb = microstrip_ref.wavelength(10E9)
+print(lamb)
+
+#6db amp sim
+phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.165*lamb,freqs_in = freqs)
+shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+phase_load =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.167*lamb,freqs_in = freqs)
+shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+source_match = mt.system_tools.network_cascade(shunt_source.network,phase_source.network)
+load_match = mt.system_tools.network_cascade(phase_load.network,shunt_load.network)
+
+amp = mt.system_tools.network_cascade(source_match,bjt)
+amp_total = mt.system_tools.network_cascade(amp,load_match)
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(amp.frequencies,amp.dbmag[1][0])
+plot.plot(amp_total.frequencies,amp_total.dbmag[0][0])
 
-
+"""
 smith = mt.plotting_tools.smith_chart()
 real = [np.real(x) for x in shunt_t_line_cascade.complex[0][0]]
 imag = [np.imag(x) for x in shunt_t_line_cascade.complex[0][0]]
 smith.ax.plot(real,imag)
-"""
+
 #annotate every 1GHz
 point = 0
 for xy in zip(real, imag):  
