@@ -32,9 +32,9 @@ print(lamb)
 
 #6db amp sim
 phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.165*lamb,freqs_in = freqs)
-shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb,freqs_in = freqs, typem="short", shunt_in=True)
 phase_load =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.167*lamb,freqs_in = freqs)
-shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb,freqs_in = freqs, typem="short", shunt_in=True)
 source_match = mt.system_tools.network_cascade(shunt_source.network,phase_source.network)
 load_match = mt.system_tools.network_cascade(phase_load.network,shunt_load.network)
 
@@ -45,7 +45,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(amp_total.frequencies,amp_total.dbmag[0][0])
+plot.plot(amp_total.frequencies,amp_total.dbmag[1][0])
 
 """
 smith = mt.plotting_tools.smith_chart()

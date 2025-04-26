@@ -16,20 +16,19 @@ freqs = np.linspace(1E9,12E9,1000)
 bjt = mt.system_tools.network(file)
 
 microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
-lamb = microstrip_ref.wavelength(10E9)
-print(lamb)
+lamb = microstrip_ref.wavelength(5E9)
 
 
-phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.165*lamb,freqs_in = freqs)
-shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb,freqs_in = freqs, typem="open", shunt_in=True)
-t_line_casc = mt.system_tools.network_cascade(phase_source.network,shunt_source.network)
-bjt_casc = mt.system_tools.network_cascade(bjt,bjt)
+shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.25*lamb,freqs_in = freqs, typem="loaded",zl_in=115)
+match = mt.system_tools.network_cascade(shunt_match.network,phase_match.network)
+
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(t_line_casc.frequencies,t_line_casc.dbmag[0][0])
+plot.plot(match.frequencies,match.dbmag)
 
 """
 smith = mt.plotting_tools.smith_chart()

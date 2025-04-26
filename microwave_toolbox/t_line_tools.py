@@ -19,7 +19,7 @@ class microstrip():
 
         if zl_in is not None:
             self.zl = zl_in     
-
+        
         self.sub_type = "microstrip"
         self.zo=zo
         self.er=er
@@ -31,7 +31,10 @@ class microstrip():
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
         if freqs_in is not None:
-            self.create_network(freqs_in,self.length,shunt = shunt_in)
+            if shunt_in is not  None:
+                self.create_network(freqs_in,self.length,shunt = shunt_in)
+            else:
+                self.create_network(freqs_in,self.length,shunt = False)
 
     def microstrip_calc(self,zo_in,er,sub_t):
 
@@ -62,7 +65,7 @@ class microstrip():
         # calculate parameters of waves on line
         self.vp_line=299792458/np.sqrt(self.ereff)
 
-    def create_network(self,freqs,length, shunt = None):
+    def create_network(self,freqs,length, shunt):
         self.length = length
         if self.typem == "t_line":
             self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
@@ -96,7 +99,7 @@ class microstrip():
 
             elif shunt:
                 #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
-                adm = (1/(self.input_z(freqs[f],self.length,self.zl)/50))
+                adm = (1/(self.input_z(freqs[f],self.length,self.zl)))
 
                 #A
                 self.network.file_data[0][0][f]=[1,0]
