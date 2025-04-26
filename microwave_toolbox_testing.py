@@ -16,11 +16,11 @@ freqs = np.linspace(1E9,12E9,1000)
 bjt = mt.system_tools.network(file)
 
 microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
-lamb = microstrip_ref.wavelength(5E9)
+lamb = microstrip_ref.wavelength(3E9)
 
 
-shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
-phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.25*lamb,freqs_in = freqs, typem="loaded",zl_in=115)
+shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.15*lamb,freqs_in = freqs, typem="short", shunt_in=True)
+phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.116*lamb,freqs_in = freqs, typem="loaded",zl_in=115)
 match = mt.system_tools.network_cascade(shunt_match.network,phase_match.network)
 
 
