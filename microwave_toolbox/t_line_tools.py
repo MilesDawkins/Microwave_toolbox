@@ -67,7 +67,7 @@ class microstrip():
         if self.typem == "t_line":
             self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
         elif shunt:
-            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='RI')
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
         else:
             self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
         
@@ -95,19 +95,17 @@ class microstrip():
                 self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
 
             elif shunt:
-                #reference for this eq: http://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_III_-_Networks_(Steer)/02%3A_Chapter_2/2.5%3A_Scattering_Parameter_Matrices_of_Common_Two-Ports
-                adm = (1/self.input_z(freqs[f],self.length,self.zl))/(1/50)
-                gamma_in = -1*(adm/(adm+2))
-                gamma_thru = (2/(adm+2))
+                #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
+                adm = (1/(self.input_z(freqs[f],self.length,self.zl)/50))
 
-                #s11
-                self.network.file_data[0][0][f]=[np.real(gamma_in), np.imag(gamma_in)]
-                #s21
-                self.network.file_data[1][0][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
-                 #s12
-                self.network.file_data[0][1][f]=[np.real(gamma_thru), np.imag(gamma_thru)]
-                 #s22
-                self.network.file_data[1][1][f]=[np.real(gamma_in), np.imag(gamma_in)]
+                #A
+                self.network.file_data[0][0][f]=[1,0]
+                #B
+                self.network.file_data[0][1][f]=[0, 0]
+                #C
+                self.network.file_data[1][0][f]=[np.real(adm),np.imag(adm)]
+                #D
+                self.network.file_data[1][1][f]=[1, 0]
                 
                 
             else: 
