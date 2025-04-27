@@ -3,7 +3,7 @@ import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t,length,freqs_in = None, shunt_in = None, typem = None, zl_in = None):
+    def __init__(self,zo,er,sub_t,length,freqs_in = None, shunt_in = None, typem = None, zl_in = None, length_unit = None, center_freq = None):
         # create class instance globals
 
         self.zl = np.inf
@@ -26,10 +26,17 @@ class microstrip():
         self.ereff = 0
         self.sub_t=sub_t
         self.length = length
+        
        
         
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
+        if  length_unit != None:
+            if length_unit == "meters":
+                self.length = length
+            if length_unit == "lambda":
+                self.length = length * self.vp_line/center_freq
+
         if freqs_in is not None:
             if shunt_in is not  None:
                 self.create_network(freqs_in,self.length,shunt = shunt_in)
@@ -49,6 +56,7 @@ class microstrip():
         if(wsd1<2):
             self.width=sub_t*wsd1
             wsdf=wsd1
+
         elif(wsd1>=2):
             self.width=sub_t*wsd2
             wsdf=wsd2
@@ -81,6 +89,7 @@ class microstrip():
             if self.typem == "t_line":
                 if self.zo != 50:
                     gamma_in = (self.zo-50)/(self.zo+50)
+                    print(gamma_in)
                 else:
                     gamma_in = 1E-12
 
@@ -88,10 +97,10 @@ class microstrip():
                 self.network.file_data[0][0][f][0]=np.abs(gamma_in)
                 self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
                 #s21
-                self.network.file_data[1][0][f][0]=1
+                self.network.file_data[1][0][f][0]=1-gamma_in**2
                 self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
                 #s12
-                self.network.file_data[0][1][f][0]=1
+                self.network.file_data[0][1][f][0]=1-gamma_in**2
                 self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
                 #s22
                 self.network.file_data[1][1][f][0]=np.abs(gamma_in)
