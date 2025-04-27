@@ -76,7 +76,7 @@ class microstrip():
     def create_network(self,freqs,length, shunt):
         self.length = length
         if self.typem == "t_line":
-            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
         elif shunt:
             self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
         else:
@@ -87,24 +87,19 @@ class microstrip():
             beta_freq = (2*np.pi)/lambda_freq
 
             if self.typem == "t_line":
-                if self.zo != 50:
-                    gamma_in = (self.zo-50)/(self.zo+50)
-                    print(gamma_in)
-                else:
-                    gamma_in = 1E-12
 
-                #s11
-                self.network.file_data[0][0][f][0]=np.abs(gamma_in)
-                self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
-                #s21
-                self.network.file_data[1][0][f][0]=1-gamma_in**2
-                self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
-                #s12
-                self.network.file_data[0][1][f][0]=1-gamma_in**2
-                self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
-                #s22
-                self.network.file_data[1][1][f][0]=np.abs(gamma_in)
-                self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+                #A
+                a = np.cos(beta_freq * length)
+                self.network.file_data[0][0][f]=[np.real(a),np.imag(a)]
+                #B
+                b = 1j*self.zo*np.sin(beta_freq * length)
+                self.network.file_data[0][1][f]=[np.real(b),np.imag(b)]
+                #C
+                c = 1j*(1/self.zo)*np.sin(beta_freq * length)
+                self.network.file_data[1][0][f]=[np.real(c),np.imag(c)]
+                #D
+                d = np.cos(beta_freq * length)
+                self.network.file_data[1][1][f]=[np.real(d),np.imag(d)]
 
             elif shunt:
                 #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
