@@ -3,24 +3,38 @@ import cmath as cm
 from . import system_tools
 
 class microstrip():
-    def __init__(self,zo,er,sub_t, type = None):
+    def __init__(self,zo,er,sub_t,length,freqs_in = None, shunt_in = None, typem = None, zl_in = None):
         # create class instance globals
-        if type is None:
-            self.type = "t_line"
+
+        self.zl = np.inf
+
+        if typem is None:
+            self.typem = "t_line"
         else:
-            self.type = type
+            self.typem = typem
+            if self.typem == "open":
+                self.zl = np.inf
+            elif self.typem == "short":
+                self.zl = 0
+
+        if zl_in is not None:
+            self.zl = zl_in     
+        
         self.sub_type = "microstrip"
         self.zo=zo
-        self.zl = np.inf
         self.er=er
         self.ereff = 0
         self.sub_t=sub_t
-        self.length = 0
-        self.z_in = np.inf
+        self.length = length
+       
         
         # calculate initial microstrip parameters
         self.microstrip_calc(self.zo,self.er,self.sub_t)
-        
+        if freqs_in is not None:
+            if shunt_in is not  None:
+                self.create_network(freqs_in,self.length,shunt = shunt_in)
+            else:
+                self.create_network(freqs_in,self.length,shunt = False)
 
     def microstrip_calc(self,zo_in,er,sub_t):
 
@@ -36,7 +50,6 @@ class microstrip():
             self.width=sub_t*wsd1
             wsdf=wsd1
         elif(wsd1>=2):
-            print(wsd2)
             self.width=sub_t*wsd2
             wsdf=wsd2
         
@@ -52,34 +65,61 @@ class microstrip():
         # calculate parameters of waves on line
         self.vp_line=299792458/np.sqrt(self.ereff)
 
-    def create_network(self,freqs,length):
+    def create_network(self,freqs,length, shunt):
         self.length = length
-        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        if self.typem == "t_line":
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='MA')
+        elif shunt:
+            self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+        else:
+            self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
+        
         for f in range(len(freqs)):
             lambda_freq = self.vp_line/freqs[f]
             beta_freq = (2*np.pi)/lambda_freq
 
-            if self.type is "t_line":
+            if self.typem == "t_line":
                 if self.zo != 50:
                     gamma_in = (self.zo-50)/(self.zo+50)
                 else:
                     gamma_in = 1E-12
-            elif self.type is "short":
-                gamma_in = (self.input_z(freqs[f],self.length,0)-50)/(self.input_z(freqs[f],self.length,0)+50)
-            elif self.type is "open":
-                gamma_in = (self.input_z(freqs[f],self.length,np.inf)-50)/(self.input_z(freqs[f],self.length,np.inf)+50)
-            #s11
-            self.network.file_data[0][0][f][0]=np.abs(gamma_in)
-            self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
-            #s21
-            self.network.file_data[1][0][f][0]=1*np.abs(gamma_in)**2
-            self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
-            #s12
-            self.network.file_data[0][1][f][0]=1*np.abs(gamma_in)**2
-            self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
-            #s22
-            self.network.file_data[1][1][f][0]=np.abs(gamma_in)
-            self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+
+                #s11
+                self.network.file_data[0][0][f][0]=np.abs(gamma_in)
+                self.network.file_data[0][0][f][1]=(180/np.pi)*cm.phase(gamma_in)
+                #s21
+                self.network.file_data[1][0][f][0]=1
+                self.network.file_data[1][0][f][1]=(180/np.pi)*beta_freq*length
+                #s12
+                self.network.file_data[0][1][f][0]=1
+                self.network.file_data[0][1][f][1]=(180/np.pi)*beta_freq*length
+                #s22
+                self.network.file_data[1][1][f][0]=np.abs(gamma_in)
+                self.network.file_data[1][1][f][1]=(180/np.pi)*cm.phase(gamma_in)
+
+            elif shunt:
+                #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
+                adm = (1/(self.input_z(freqs[f],self.length,self.zl)))
+
+                #A
+                self.network.file_data[0][0][f]=[1,0]
+                #B
+                self.network.file_data[0][1][f]=[0, 0]
+                #C
+                self.network.file_data[1][0][f]=[np.real(adm),np.imag(adm)]
+                #D
+                self.network.file_data[1][1][f]=[1, 0]
+                
+                
+            else: 
+                if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
+                else:
+                    gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
+                #s11
+                self.network.file_data[f][0]=np.abs(gamma_in)
+                self.network.file_data[f][1]=(180/np.pi)*cm.phase(gamma_in)
+               
 
     def wavelength(self,frequency):
         self.lambda_line = self.vp_line/frequency
@@ -87,11 +127,12 @@ class microstrip():
     
     def input_z(self,frequency,length,zl):
         lambda_line = self.vp_line/frequency
-        self.zl = zl
+        
         if(zl == 0):
             self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
         elif(zl == np.inf):
             self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/lambda_line)*length))
+            
         else:
             self.z_in = self.zo*((zl+1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length))/(self.zo+1j*zl*np.tan(((2*np.pi)/lambda_line)*length)))
 
