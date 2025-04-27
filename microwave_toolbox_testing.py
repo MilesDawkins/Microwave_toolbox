@@ -11,18 +11,19 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E9,40E9,1000)
+freqs = np.linspace(1E9,12E9,1000)
 bjt = mt.system_tools.network(file)
 
 microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
 print(microstrip_ref.ereff)
 lamb = microstrip_ref.wavelength(3E9)
+sl = 0.23*lamb
+pl = 0.09*lamb
+shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,sl,freqs_in = freqs, typem="open", shunt_in=True)
+phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,pl,freqs_in = freqs)
+phase_match_l = mt.t_line_tools.microstrip(50,4.4,1.6E-3,pl,freqs_in = freqs, typem="loaded",zl_in=115)
 
-
-shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.021203,freqs_in = freqs, typem="open", shunt_in=True)
-phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.008609,freqs_in = freqs, typem="loaded",zl_in=115)
-match = shunt_match.network ** phase_match.network
-amp = bjt ** match
+amp = shunt_match.network ** phase_match_l.network
 
 print("--- %s seconds ---" % (time.time() - start_time))
 

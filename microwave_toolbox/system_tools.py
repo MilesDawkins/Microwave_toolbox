@@ -5,7 +5,7 @@ import matplotlib.pyplot as plot
 
 class network():
      
-    def __init__(self,file_path = None , num_ports = None, frequencies = None, s_user = None, format = None):
+    def __init__(self,file_path = None , num_ports = None, frequencies = None, s_user = None, format = None, zl_in = None):
             
             # create class instance globals
             self.type = "Network"
