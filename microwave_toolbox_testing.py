@@ -18,18 +18,18 @@ microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
 print(microstrip_ref.ereff)
 lamb = microstrip_ref.wavelength(3E9)
 sl = 0.23*lamb
-pl = 0.09*lamb
+pl = 0.9*lamb
 shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,sl,freqs_in = freqs, typem="open", shunt_in=True)
 phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,pl,freqs_in = freqs)
 phase_match_l = mt.t_line_tools.microstrip(50,4.4,1.6E-3,pl,freqs_in = freqs, typem="loaded",zl_in=115)
 
-amp = shunt_match.network ** phase_match_l.network
+amp = shunt_match.network ** phase_match.network ** bjt ** phase_match.network ** shunt_match.network
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(amp.frequencies,amp.dbmag)
+plot.plot(amp.frequencies,amp.dbmag[1][0])
 plot.ylim([-40,0])
 
 """
