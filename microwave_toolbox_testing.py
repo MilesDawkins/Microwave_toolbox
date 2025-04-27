@@ -21,8 +21,8 @@ lamb = microstrip_ref.wavelength(3E9)
 
 shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.021203,freqs_in = freqs, typem="open", shunt_in=True)
 phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.008609,freqs_in = freqs, typem="loaded",zl_in=115)
-match = mt.system_tools.network_cascade(shunt_match.network,phase_match.network)
-amp = mt.system_tools.network_cascade(bjt,match)
+match = shunt_match.network ** phase_match.network
+amp = bjt ** match
 
 print("--- %s seconds ---" % (time.time() - start_time))
 

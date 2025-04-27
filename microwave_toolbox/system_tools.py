@@ -352,7 +352,9 @@ class network():
         temp[1][1] = [((-1*a+(b/self.z_reference)-c*self.z_reference+d)/((a+b/self.z_reference)+(c*self.z_reference)+d)) for a,b,c,d in zip(self.abcd[0][0],self.abcd[0][1],self.abcd[1][0],self.abcd[1][1])]
             
         return temp
-        
+    
+    def __pow__(self, other):
+        return network_cascade(self,other)
 
 def reverse_network(s1: network):
    temp1 =  s1.file_data[0][0]
