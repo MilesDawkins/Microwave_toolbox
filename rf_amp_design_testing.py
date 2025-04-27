@@ -11,7 +11,7 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E9,12E9,1000)
+freqs = np.linspace(1E1,12E9,1000)
 gain_req = 6
 
 bjt = mt.system_tools.network(file)
@@ -32,9 +32,9 @@ print(lamb)
 
 #6db amp sim
 phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.165*lamb,freqs_in = freqs)
-shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb,freqs_in = freqs, typem="short", shunt_in=True)
+shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb+0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
 phase_load =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.167*lamb,freqs_in = freqs)
-shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb,freqs_in = freqs, typem="short", shunt_in=True)
+shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb+0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
 source_match = mt.system_tools.network_cascade(shunt_source.network,phase_source.network)
 load_match = mt.system_tools.network_cascade(phase_load.network,shunt_load.network)
 
