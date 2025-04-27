@@ -270,7 +270,7 @@ class network():
                 for j in range(self.num_ports):
                     temp[i].append([])
 
-            if self.format is not "ABCD":
+            if self.format != "ABCD":
                 for i in range(self.num_ports):
                     for j in range(self.num_ports): 
                         if self.format == "DB":  
@@ -321,7 +321,7 @@ class network():
                 for j in range(self.num_ports):
                     temp[i].append([])
 
-            if self.format is not "ABCD":
+            if self.format != "ABCD":
                 for f in range(len(self.frequencies)):
                     temp[0][0][f]=(((1+self.complex[0][0][f])*(1-self.complex[1][1][f])+(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
                     temp[0][1][f]=(self.z_reference*((1+self.complex[0][0][f])*(1+self.complex[1][1][f])-(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
