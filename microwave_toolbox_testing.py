@@ -13,36 +13,31 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 #################calulation functions###########################
 freqs = np.linspace(1, 10E9,1000)
 bjt = mt.system_tools.network(file)
-f0 = 2E9
-microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
 
-sl = 0.1
-pl = 0.125
+f0 = 1.5E9
+sl = 0.25
+pl = 0.25
 
 z1 = 50
-z2 = 50
-z12 = 50
+z2 = 39#30.1
+z12 = 48.4
+z23 = 49.1
 
 
-shunt_match1 = mt.t_line_tools.microstrip(z1,4.4,1.6E-3,sl,freqs_in = freqs, typem="open", shunt_in=True, length_unit="lambda", center_freq= f0)
-shunt_match2 = mt.t_line_tools.microstrip(z2,4.4,1.6E-3,sl,freqs_in = freqs, typem="open", shunt_in=True, length_unit="lambda", center_freq= f0)
-shunt_match3 = mt.t_line_tools.microstrip(z1,4.4,1.6E-3,sl,freqs_in = freqs, typem="open", shunt_in=True, length_unit="lambda", center_freq= f0)
+shunt_match1 = mt.t_line_tools.microstrip(z1,4.4,1.6E-3,sl,freqs_in = freqs, typem="short", shunt_in=True, length_unit="lambda", center_freq = f0)
+shunt_match2 = mt.t_line_tools.microstrip(z2,4.4,1.6E-3,sl,freqs_in = freqs, typem="short", shunt_in=True, length_unit="lambda", center_freq = f0)
 
 phase_match1 = mt.t_line_tools.microstrip(z12,4.4,1.6E-3,pl,freqs_in = freqs, length_unit="lambda", center_freq= f0)
 phase_match2 = mt.t_line_tools.microstrip(z12,4.4,1.6E-3,pl,freqs_in = freqs, length_unit="lambda", center_freq= f0)
 
-
-
-network = shunt_match1.network ** phase_match1.network ** shunt_match2.network ** phase_match2.network ** shunt_match3.network
-
-
+network = shunt_match1.network ** phase_match1.network ** shunt_match2.network ** phase_match2.network ** shunt_match2.network ** phase_match1.network ** shunt_match1.network
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
-
 ##################plotting functions#######################
+plot.plot(network.frequencies,network.dbmag[1][0])
 plot.plot(network.frequencies,network.dbmag[0][0])
-plot.ylim([-18,0])
+plot.ylim([-50,0])
 
 
 """
