@@ -370,7 +370,7 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
     if  interp_freq_step == None:
         interp_freq_step = 10E6
     #determine frequencies that cascade can be performed
-    f_min = min(s1.frequencies[0],s2.frequencies[0])
+    f_min = max(min(s1.frequencies),min(s2.frequencies))
     f_max = min(s1.frequencies[(len(s1.frequencies)-1)],s2.frequencies[(len(s2.frequencies)-1)])
     freq=np.arange(start=f_min,stop=f_max+interp_freq_step,step=interp_freq_step)
     

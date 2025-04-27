@@ -11,24 +11,25 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E9,12E9,1000)
-
+freqs = np.linspace(2E9,22E9,1000)
 bjt = mt.system_tools.network(file)
 
 microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
+print(microstrip_ref.ereff)
 lamb = microstrip_ref.wavelength(3E9)
 
 
-shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.15*lamb,freqs_in = freqs, typem="short", shunt_in=True)
-phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.116*lamb,freqs_in = freqs, typem="loaded",zl_in=115)
+shunt_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.021203,freqs_in = freqs, typem="open", shunt_in=True)
+phase_match = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.008609,freqs_in = freqs, typem="loaded",zl_in=115)
 match = mt.system_tools.network_cascade(shunt_match.network,phase_match.network)
-
+amp = mt.system_tools.network_cascade(bjt,match)
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(match.frequencies,match.dbmag)
+plot.plot(amp.frequencies,amp.dbmag)
+plot.ylim([-40,0])
 
 """
 smith = mt.plotting_tools.smith_chart()
