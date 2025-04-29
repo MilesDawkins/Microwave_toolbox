@@ -365,6 +365,10 @@ def reverse_network(s1: network):
    s1.file_data[0][1] = [x for x in temp2]
    s1.reversed = True
 
+def gamma_2_impedance(z_ref,g_in):
+    out = z_ref*((1+g_in)/(1-g_in))
+    return out
+
 def network_cascade(s1: network,s2: network, interp_freq_step = None):
     if s1.num_ports == 1:
         SyntaxError("Cannot series cascade a 1 port onto another network, reverse order of inputs or check input network parameters")
