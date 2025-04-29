@@ -5,17 +5,15 @@ import matplotlib.pyplot as plot
 
 def ArrayFactor(ElementArray, Freq):
     
-    arrayFactor = np.ones((360, 95))
+    arrayFactor = np.ones((360, 180))
     Lambda = 3e8 / Freq
 
     for theta in range(95):
         for phi in range(360):                                                                                                      # For all theta/phi positions
             elementSum = 1e-9 + 0j
-
             for element in ElementArray:                                                                                            # Summation of each elements contribution at theta/phi position.
                 relativePhase = CalculateRelativePhase(element, Lambda, np.radians(theta), np.radians(phi))                     
                 elementSum += element[3] * np.e ** ((relativePhase + element[4]) * 1j)                                            # Element contribution = Amp * e^j(Phase + Phase Weight)
-
             arrayFactor[phi][theta] = elementSum.real
 
     return arrayFactor

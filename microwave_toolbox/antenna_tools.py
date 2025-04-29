@@ -16,20 +16,32 @@ class antenna():
             self.freq_min = 0
             self.phi = []
             self.theta = []
-            self.file_data = [[[]*1]*1]*1
+            self.rad_intensity = [[[]*1]*1]*1
+            self.p_in = 1
             self.coor_system = "Spherical"
             self.version = ""
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
 
+
 def create_dipole(f0):
     dp = antenna()
-    phi = np.linspace(-90,90,1)
-    theta = np.linspace(-90,90,1)
+    phi = np.linspace(-np.pi,np.pi,181)
+    theta = np.linspace(-np.pi,np.pi,181)
     dp.phi = phi
     dp.theta = theta
+    l = (3E8/f0)/2
+    eta = 120*np.pi
+    beta = (2*np.pi)/(3E8/f0)
+    for t in range(len(dp.theta)):
+        dp.rad_intensity.append([[None]])
+        for p in range(len(dp.phi-1)):
+            dp.rad_intensity[t].append([None])
 
+    for t in range(len(dp.theta)):
+        for p in range(len(dp.phi-1)):
+            dp.rad_intensity[t][p] = eta*(dp.p_in)/(8*np.pi**2) * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
     return dp
 
 
