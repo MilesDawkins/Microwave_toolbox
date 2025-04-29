@@ -9,18 +9,28 @@ from . import system_tools as st
 #for cascade analysis in the future
 class antenna():
     def __init__(self, file_path = None, gain = None, frequencies = None):
-            
             # create class instance globals
-            self.type = "antenna"
             self.sub_type = "antenna"
             self.frequencies = []
             self.freq_max = 0
             self.freq_min = 0
+            self.phi = []
+            self.theta = []
             self.file_data = [[[]*1]*1]*1
+            self.coor_system = "Spherical"
             self.version = ""
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
+
+def create_dipole(f0):
+    dp = antenna()
+    phi = np.linspace(-90,90,1)
+    theta = np.linspace(-90,90,1)
+    dp.phi = phi
+    dp.theta = theta
+
+    return dp
 
 
 #class for defining antenna measurements in a chamber. arguments can be gain over frequency with az/el cuts
@@ -28,7 +38,6 @@ class ant_meas():
     def __init__(self, file_path = None, gain = None, frequencies = None):
             
             # create class instance globals
-            self.type = "antenna"
             self.sub_type = "measurement"
             self.frequencies = []
             self.freq_max = 0
@@ -38,8 +47,6 @@ class ant_meas():
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
-
-
 
 
 # calculates a boresight gain measurement in an anechoic chamber using the 3 antenna method
