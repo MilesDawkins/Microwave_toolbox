@@ -16,7 +16,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 ##################plotting functions#######################
 theta90 =int(np.floor(len(dpp.theta)/2))
-u =[10*np.log10(dpp.rad_intensity[int(180/4)][x]) for x in range(len(dpp.theta))]
+u =[10*np.log10(dpp.rad_intensity[x][int(180/4)]) for x in range(len(dpp.theta))]
 plot.polar(dpp.theta,u)
 plot.show()
 
