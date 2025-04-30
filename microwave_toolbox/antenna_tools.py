@@ -25,23 +25,24 @@ class antenna():
             self.z_reference = 50
 
 
-def create_dipole(f0):
+def create_dipole(f0,steps):
     dp = antenna()
-    phi = np.linspace(-np.pi,np.pi,181)
-    theta = np.linspace(-np.pi,np.pi,181)
+    phi = np.linspace(0,2*np.pi,steps)
+    theta = np.linspace(0,np.pi,int(steps/2))
     dp.phi = phi
     dp.theta = theta
     l = (3E8/f0)/2
     eta = 120*np.pi
     beta = (2*np.pi)/(3E8/f0)
-    for t in range(len(dp.theta)):
+
+    for p in range(len(dp.phi)):
         dp.rad_intensity.append([[None]])
-        for p in range(len(dp.phi-1)):
-            dp.rad_intensity[t].append([None])
+        for t in range(len(dp.theta-1)):
+            dp.rad_intensity[p].append([None])
 
     for t in range(len(dp.theta)):
         for p in range(len(dp.phi)):
-            dp.rad_intensity[t][p] = eta*(dp.p_in)/(8*np.pi**2) * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
+            dp.rad_intensity[p][t] = eta*(dp.p_in)/(8*np.pi**2) * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
     return dp
 
 

@@ -11,32 +11,44 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
-dpp = mt.antenna_tools.create_dipole(2E9)
-print("--- %s seconds ---" % (time.time() - start_time))
-
-##################plotting functions#######################
-theta90 =int(np.floor(len(dpp.theta)/2))
-
-
-num_ele = 10
+dpp = mt.antenna_tools.create_dipole(2E9,1000)
+num_ele = 2
 x_spacing = (3E8/2E9)/2
 
 ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele-1)*x_spacing/2
-weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
+#weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 for x in range(num_ele):
     ele_pos[x][2] = start_x+x*x_spacing
-array = mt.phased_array_tools.element_array(dpp,ele_pos, weights = weights)
-array.calc_array_factor(2E9)
+array = mt.phased_array_tools.element_array(dpp,ele_pos,1000)
+array.calc_array_factor(2E9,1000)
 
-af = [array.array_factor[90][x] for x in range(len(array.array_factor[180]))]
-du = [dpp.rad_intensity[int(180/4)][x] for x in range(int(np.floor(len(dpp.phi))))]
+au = np.zeros((1000,500))
 
-au = [20*np.log10(np.abs(x)*np.abs(y)) for x,y in zip(af,du)]
-theta = np.linspace(0,np.pi,181)
+for p in range(1000):
+    au[p] = [10*np.log10(x * y) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
+    
+phi = np.linspace(0,2*np.pi,1000)
+theta = np.linspace(0,np.pi,500)
 
+print("--- %s seconds ---" % (time.time() - start_time))
+##################plotting functions#######################
+"""
+data_array = np.array(au)
+x_dim, y_dim = data_array.shape
+x_axis, y_axis = np.meshgrid(np.arange(x_dim), np.arange(y_dim))
+
+
+
+fig = plot.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(x_axis, y_axis, data_array.T)
+
+plot.show()
+
+"""
 fig, ax = plot.subplots(subplot_kw={'projection': 'polar'})
-ax.plot(theta,au)
+ax.plot(phi,[au[x][int(1000/4)] for x in range(len(au))])
 ax.set_rlim(-20,40)
 plot.show()
 
