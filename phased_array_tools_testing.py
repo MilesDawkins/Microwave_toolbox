@@ -16,8 +16,24 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 ##################plotting functions#######################
 theta90 =int(np.floor(len(dpp.theta)/2))
-u =[10*np.log10(dpp.rad_intensity[x][int(180/4)]) for x in range(len(dpp.theta))]
-plot.polar(dpp.theta,u)
+
+
+num_ele = 4
+x_spacing = (3E8/2E9)/1.2
+ele_pos = np.zeros((num_ele,3))
+start_x = -(num_ele-1)*x_spacing/2
+for x in range(num_ele):
+    ele_pos[x][2] = start_x+x*x_spacing
+array = mt.phased_array_tools.element_array(dpp,ele_pos)
+array.calc_array_factor(2E9)
+
+af = [array.array_factor[90][x] for x in range(len(array.array_factor[180]))]
+du = [dpp.rad_intensity[int(180/4)][x] for x in range(int(np.floor(len(dpp.phi)/2)))]
+
+au = [10*np.log10(np.abs(x)*np.abs(y)) for x,y in zip(af,du)]
+theta = np.linspace(0,np.pi/2,90)
+
+plot.polar(theta,au)
 plot.show()
 
 

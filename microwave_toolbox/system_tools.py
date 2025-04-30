@@ -274,7 +274,7 @@ class network():
                 for i in range(self.num_ports):
                     for j in range(self.num_ports): 
                         if self.format == "DB":  
-                            temp[i][j] = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data[i][j]]
+                            temp[i][j] = [((10**(float(x[0])/20))*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**(float(x[0])/20))*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data[i][j]]
                         elif self.format == "RI":  
                             temp[i][j] = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
                         elif self.format == "MA": 
