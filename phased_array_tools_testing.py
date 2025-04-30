@@ -39,18 +39,9 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 
 print("--- %s seconds ---" % (time.time() - start_time))
 ##################plotting functions#######################
-"""
-data_array = np.array(au)
-x_dim, y_dim = data_array.shape
-x_axis, y_axis = np.meshgrid(np.arange(x_dim), np.arange(y_dim))
+phi_a = np.array(phi)
+theta_a = np.array(theta)
 
-fig = plot.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(x_axis, y_axis, data_array.T)
-
-plot.show()
-
-"""
 """
 fig, ax = plot.subplots(subplot_kw={'projection': 'polar'})
 ax.plot(phi,[au[x][int(step_size/4)] for x in range(len(au))])
@@ -61,9 +52,6 @@ mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
 mag[nan_mask|inf_mask] = -30
-
-phi_a = np.array(phi)
-theta_a = np.array(theta)
 
 theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
 print(mag)
