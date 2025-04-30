@@ -34,7 +34,7 @@ class element_array:
                 for element in range(self.num_elements):                                                                       # Summation of each elements contribution at theta/phi position.
                     wave_phase = self.calc_wave_phase(self.element_coor[element], Lambda,theta[t], phi[p])                     
                     element_sum += self.weights[element] * np.e ** ((wave_phase + self.phases[element]) * 1j)                  # Element contribution = Amp * e^j(Phase + Phase Weight)
-                self.array_factor[p][t] = np.abs(element_sum)
+                self.array_factor[p][t] = np.real(element_sum)
 
 
     
