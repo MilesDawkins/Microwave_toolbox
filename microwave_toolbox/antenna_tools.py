@@ -40,7 +40,7 @@ def create_dipole(f0):
             dp.rad_intensity[t].append([None])
 
     for t in range(len(dp.theta)):
-        for p in range(len(dp.phi-1)):
+        for p in range(len(dp.phi)):
             dp.rad_intensity[t][p] = eta*(dp.p_in)/(8*np.pi**2) * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
     return dp
 

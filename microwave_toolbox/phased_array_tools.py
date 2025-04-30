@@ -10,7 +10,7 @@ class element_array:
     def __init__(self, element : at.antenna, element_coor : list, weights = None, phases = None):
         self.element = element
         self.element_coor = element_coor
-        self.array_factor = np.ones((360, 180))
+        self.array_factor = np.ones((360, 360))
         self.num_elements = len(element_coor)
 
         if weights is not None:
@@ -22,17 +22,11 @@ class element_array:
             self.phases = phases
         else:
             self.phases = np.zeros(self.num_elements)
-        
-        
-        
-        return
+
 
     def calc_array_factor(self, Freq):
-        
-        theta = np.linspace(0,90,)
         Lambda = 3e8 / Freq
-
-        for theta in range(180):
+        for theta in range(360):
             for phi in range(360):                                                                                                      # For all theta/phi positions
                 element_sum = 1e-9 + 0j
                 for element in range(self.num_elements):                                                                                            # Summation of each elements contribution at theta/phi position.
