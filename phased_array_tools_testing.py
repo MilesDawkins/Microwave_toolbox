@@ -14,22 +14,22 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 #################calulation functions###########################
 step_size = 300
 num_ele = 16
-x_spacing = (3E8/2E9)
-delta_phi = np.radians(0)
+x_spacing = (3E8/2E9)/2
+delta_phi_x = np.radians(28)
+delta_phi_y = np.radians(28)
 #weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
 
 ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/4-1)*x_spacing/2
 phases = np.zeros(16)
-for ele in range (num_ele):
-    phases[ele] = ele*delta_phi
 
 for row in range(4):
     for col in range(4):
      print(((row*4)+(col)))
      ele_pos[((row*4)+(col))][2] = start_x+row*x_spacing
      ele_pos[((row*4)+(col))][0] = start_x+col*x_spacing
+     phases[((row*4)+(col))] = col*delta_phi_x + row*delta_phi_y
 
 print(ele_pos)
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
