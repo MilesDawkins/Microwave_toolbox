@@ -10,7 +10,7 @@ class element_array:
     def __init__(self, element : at.antenna, element_coor : list, steps, weights = None, phases = None):
         self.element = element
         self.element_coor = element_coor
-        self.array_factor = np.ones((steps, int(steps/2)))
+        self.array_factor = np.ones((steps, int(steps/2)),dtype=complex)
         self.num_elements = len(element_coor)
 
         if weights is not None:
@@ -34,7 +34,7 @@ class element_array:
                 for element in range(self.num_elements):                                                                       # Summation of each elements contribution at theta/phi position.
                     wave_phase = self.calc_wave_phase(self.element_coor[element], Lambda,theta[t], phi[p])                     
                     element_sum += self.weights[element] * np.e ** ((wave_phase + self.phases[element]) * 1j)                  # Element contribution = Amp * e^j(Phase + Phase Weight)
-                self.array_factor[p][t] = np.real(element_sum)
+                self.array_factor[p][t] = element_sum
 
 
     

@@ -13,23 +13,23 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
 step_size = 300
-num_ele = 16
+num_ele = 4**2
 x_spacing = (3E8/2E9)/2
-delta_phi_x = np.radians(28)
-delta_phi_y = np.radians(28)
+delta_phi_x = np.radians(0)
+delta_phi_y = np.radians(0)
 #weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
 
 ele_pos = np.zeros((num_ele,3))
-start_x = -(num_ele/4-1)*x_spacing/2
-phases = np.zeros(16)
+start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
+phases = np.zeros(num_ele)
 
-for row in range(4):
-    for col in range(4):
-     print(((row*4)+(col)))
-     ele_pos[((row*4)+(col))][2] = start_x+row*x_spacing
-     ele_pos[((row*4)+(col))][0] = start_x+col*x_spacing
-     phases[((row*4)+(col))] = col*delta_phi_x + row*delta_phi_y
+for row in range(int(np.sqrt(num_ele))):
+    for col in range(int(np.sqrt(num_ele))):
+     print(((row*int(np.sqrt(num_ele)))+(col)))
+     ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
+     ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
+     phases[((row*int(np.sqrt(num_ele)))+(col))] = col*delta_phi_x + row*delta_phi_y
 
 print(ele_pos)
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
@@ -38,7 +38,7 @@ array.calc_array_factor(2E9,step_size)
 au = np.zeros((step_size,int(step_size/2)))
 
 for p in range(step_size):
-    au[p] = [20*np.log10(x * y) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
+    au[p] = [20*np.log10(np.abs(x * y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
     
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
@@ -48,12 +48,17 @@ print("--- %s seconds ---" % (time.time() - start_time))
 phi_a = np.array(phi)
 theta_a = np.array(theta)
 threshold = -10
-"""
-fig, ax = plot.subplots(subplot_kw={'projection': 'polar'})
-ax.plot(phi,[au[x][int(step_size/4)] for x in range(len(au))])
-ax.set_rlim(-20,40)
+
+fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
+ay.plot(phi,[au[x][int(step_size/4)] for x in range(len(au))])
+ay.set_rlim(-20,40)
 plot.show()
-"""
+
+fig, az = plot.subplots(subplot_kw={'projection': 'polar'})
+az.plot(theta,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az.set_rlim(-20,40)
+plot.show()
+
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
