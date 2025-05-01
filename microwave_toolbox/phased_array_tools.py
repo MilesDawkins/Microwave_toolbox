@@ -44,7 +44,7 @@ class element_array:
 
         xVector = Element[0] * np.sin(theta) * np.cos(phi)
         yVector = Element[1] * np.sin(theta) * np.sin(phi)
-        zVector = Element[2] * np.cos(phi)
+        zVector = Element[2] * np.cos(theta)
 
         element_wave_phase = phaseConstant * (xVector + yVector + zVector)
 
