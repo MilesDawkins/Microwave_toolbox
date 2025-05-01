@@ -8,21 +8,23 @@ import time
 
 ##############setup functions####################
 start_time = time.time()
-script_directory = os.path.dirname(os.path.abspath(__file__))
-file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
+step_size = 300
+num_ele = 4**2
+x_spacing = (3E8/2E9)/2
+steer_theta = -20
+steer_phi = -20
+
+#weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 
 #################calulation functions###########################
-step_size = 300
-num_ele = 10**2
-x_spacing = (3E8/2E9)/2
-delta_phi_x = np.radians(0)
-delta_phi_y = np.radians(0)
-#weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
 
 ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
+
+delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/2E9))
+delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_phi)))/(3E8/2E9))
 
 for row in range(int(np.sqrt(num_ele))):
     for col in range(int(np.sqrt(num_ele))):
@@ -51,12 +53,12 @@ threshold = -10
 
 fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
 ay.plot(phi,[au[x][int(step_size/4)] for x in range(len(au))])
-ay.set_rlim(-20,40)
+#ay.set_rlim(-20,40)
 plot.show()
 
 fig, az = plot.subplots(subplot_kw={'projection': 'polar'})
 az.plot(theta,[au[int(step_size/4)][x] for x in range(len(au[0]))])
-az.set_rlim(-20,40)
+#az.set_rlim(-20,40)
 plot.show()
 
 mag = np.array(au)
