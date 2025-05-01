@@ -13,7 +13,7 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
 step_size = 300
-num_ele = 4**2
+num_ele = 10**2
 x_spacing = (3E8/2E9)/2
 delta_phi_x = np.radians(0)
 delta_phi_y = np.radians(0)
