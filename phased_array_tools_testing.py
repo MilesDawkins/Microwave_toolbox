@@ -12,7 +12,7 @@ step_size = 300
 num_ele = 4**2
 x_spacing = (3E8/2E9)/2
 steer_theta = -10
-steer_phi = -10
+steer_phi = -20
 
 #weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 
@@ -65,15 +65,27 @@ lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
 az.set_rlim(-20,40)
 plot.show()
 
+#prepping mag array for 3d plotting
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
 less_mask =  mag < threshold
 mag[nan_mask|inf_mask|less_mask] = threshold
 mag = mag - threshold
-
+mag = mag-np.min(mag)
 theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
 print(mag)
+
+"""
+mag = np.array(au)
+nan_mask = np.isnan(mag)
+inf_mask = np.isinf(mag)
+mag[nan_mask|inf_mask] = np.min(mag[np.isfinite(mag)])
+mag = mag+np.abs(np.min(mag))
+mag = mag/np.max(mag)
+theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
+print(mag)
+"""
 
 # Convert to Cartesian coordinates
 x = mag * np.sin(theta_grid) * np.cos(phi_grid)
