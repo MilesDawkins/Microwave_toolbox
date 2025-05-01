@@ -11,8 +11,8 @@ start_time = time.time()
 step_size = 300
 num_ele = 4**2
 x_spacing = (3E8/2E9)/2
-steer_theta = -20
-steer_phi = -20
+steer_theta = -10
+steer_phi = -10
 
 #weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 
@@ -52,13 +52,17 @@ theta_a = np.array(theta)
 threshold = -10
 
 fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
-ay.plot(phi,[au[x][int(step_size/4)] for x in range(len(au))])
-#ay.set_rlim(-20,40)
+ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
+ay.set_theta_zero_location("S")
+lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
+ay.set_rlim(-20,40)
 plot.show()
 
 fig, az = plot.subplots(subplot_kw={'projection': 'polar'})
-az.plot(theta,[au[int(step_size/4)][x] for x in range(len(au[0]))])
-#az.set_rlim(-20,40)
+az.plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az.set_theta_zero_location("W")
+lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
+az.set_rlim(-20,40)
 plot.show()
 
 mag = np.array(au)
