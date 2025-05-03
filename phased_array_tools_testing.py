@@ -9,10 +9,10 @@ import time
 ##############setup functions####################
 start_time = time.time()
 step_size = 300
-num_ele = 4**2
+num_ele = 6**2
 x_spacing = (3E8/2E9)/2
-steer_theta = -10
-steer_phi = -20
+steer_theta = -0
+steer_phi = -30
 
 #weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
 
@@ -40,7 +40,7 @@ array.calc_array_factor(2E9,step_size)
 au = np.zeros((step_size,int(step_size/2)))
 
 for p in range(step_size):
-    au[p] = [20*np.log10(np.abs(x * y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
+    au[p] = [10*np.log10(np.abs(x * y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
     
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
@@ -55,14 +55,14 @@ fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
 ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 ay.set_theta_zero_location("S")
 lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
-ay.set_rlim(-20,40)
+ay.set_rlim(-20,20)
 plot.show()
 
 fig, az = plot.subplots(subplot_kw={'projection': 'polar'})
 az.plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
 az.set_theta_zero_location("W")
 lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
-az.set_rlim(-20,40)
+az.set_rlim(-20,20)
 plot.show()
 
 #prepping mag array for 3d plotting
@@ -99,6 +99,9 @@ N = N/Rmax
 fig = plot.figure()
 ax = fig.add_subplot(111, projection='3d')
 mycol = cm.jet(N)
-surf = ax.plot_surface(x, y, z, rstride=2, cstride=2, facecolors=mycol, linewidth=0.5, shade=False)  # , alpha=0.5, zorder = 0.5)
+surf = ax.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)  # , alpha=0.5, zorder = 0.5)
+limits = np.r_[ax.get_xlim3d(), ax.get_ylim3d(), ax.get_zlim3d()]
+limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
+ax.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
 #surf = ax.plot_surface(x, y, z,facecolors=mycol)
 plot.show()
