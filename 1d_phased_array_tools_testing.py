@@ -6,70 +6,64 @@ import numpy as np
 import os
 import time
 
-##############setup functions####################
-start_time = time.time()
-step_size = 300
+#setup functions##############################################################################################################
+step_size = 360
 num_ele = 10
 x_spacing = (3E8/2E9)/3
-steer_theta = -00
-
-
+weights = np.ones(num_ele)
 weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
-#################calulation functions###########################
+#calculation functions##############################################################################################################
+start_time = time.time()
+
+#calcualte dipole pattern
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
 
+#setup array based on inputs
 ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
-
 for ele in range(num_ele):
      ele_pos[ele][0] = start_x+ele*x_spacing
      x = ele_pos[ele][0]
-     #phases[ele] = np.cos((np.sqrt(x**2)*np.pi)/(3E8/2E9))-np.cos((np.sqrt((x-0.02)**2)*np.pi)/(3E8/2E9))
-     
-     
 
-print(ele_pos)
-array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights,phases = phases)
+#calcualte array factor
+array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights)
 array.calc_array_factor(2E9,step_size)
 
+#calcualte gain based on antenna pattern and array factor
 au = np.zeros((step_size,int(step_size/2)))
-
 for p in range(step_size):
-    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
-    
+    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #-10*np.log10(num_ele)
+
+print("--- %s seconds ---" % (time.time() - start_time))
+#plotting functions##############################################################################################################
+
+#create array variables for numpy plotting 
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
 
-print("--- %s seconds ---" % (time.time() - start_time))
-##################plotting functions#######################
-phi_a = np.array(phi)
-theta_a = np.array(theta)
-threshold = -20
-
-fig, ay = plot.subplots()
-ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-print(np.nanmax(au)-25)
-plot.hlines(y=[np.nanmax(au)-25], xmin=np.min(phi-np.pi/2), xmax=np.max(phi-np.pi/2), colors=['r'], linestyles=['--'])
-plot.ylim(-20,40)
-plot.show()
-
-fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
-ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-ay.set_theta_zero_location("S")
+#generate E plane cut
+fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
+az[0].plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
+az[0].set_theta_zero_location("S")
 lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
-ay.set_rlim(-20,20)
-plot.show()
+az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
 
-fig, az = plot.subplots(subplot_kw={'projection': 'polar'})
-az.plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
-az.set_theta_zero_location("W")
+#create limit line for chebyschev SL level
+limit_line = np.full(len(phi),np.nanmax(au)-25)
+az[0].plot(phi-np.pi/2,limit_line,color='r',linestyle='--')
+
+#generate H plane cut
+az[1].plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az[1].set_theta_zero_location("W")
 lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
-az.set_rlim(-20,20)
-plot.show()
+az[1].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
 
 #prepping mag array for 3d plotting
+phi_a = np.array(phi)
+theta_a = np.array(theta)
+threshold = np.nanmax(au)-40
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
@@ -80,17 +74,6 @@ mag = mag-np.min(mag)
 theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
 print(mag)
 
-"""
-mag = np.array(au)
-nan_mask = np.isnan(mag)
-inf_mask = np.isinf(mag)
-mag[nan_mask|inf_mask] = np.min(mag[np.isfinite(mag)])
-mag = mag+np.abs(np.min(mag))
-mag = mag/np.max(mag)
-theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
-print(mag)
-"""
-
 # Convert to Cartesian coordinates
 x = mag * np.sin(theta_grid) * np.cos(phi_grid)
 y = mag * np.sin(theta_grid) * np.sin(phi_grid)
@@ -100,12 +83,11 @@ Rmax = np.max(N)
 N = N/Rmax
 
 # Create the 3D plot
-fig = plot.figure()
-ax = fig.add_subplot(111, projection='3d')
+az[2].remove()
+azs = fig.add_subplot(1,3,3, projection='3d')
 mycol = cm.jet(N)
-surf = ax.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)  # , alpha=0.5, zorder = 0.5)
-limits = np.r_[ax.get_xlim3d(), ax.get_ylim3d(), ax.get_zlim3d()]
+surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)
+limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
-ax.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
-#surf = ax.plot_surface(x, y, z,facecolors=mycol)
+azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
 plot.show()
