@@ -5,22 +5,23 @@ import numpy as np
 
 
 #setup functions################################################################################
-
+f0 = 5E9
 step_size = 360
 num_ele = 5**2
-x_spacing = (3E8/2E9)/2
+x_spacing = (3E8/f0)/2
+print("Element Spacing (M) = ",x_spacing)
 steer_theta = -00
 steer_phi = -00
 
 #calulation functions#############################################################################
-dpp = mt.antenna_tools.create_dipole(2E9,step_size)
+dpp = mt.antenna_tools.create_dipole(f0,step_size)
 
 ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
 
-delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/2E9))
-delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_phi)))/(3E8/2E9))
+delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/f0))
+delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_phi)))/(3E8/f0))
 
 for row in range(int(np.sqrt(num_ele))):
     for col in range(int(np.sqrt(num_ele))):
@@ -31,7 +32,7 @@ for row in range(int(np.sqrt(num_ele))):
 
 print(ele_pos)
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
-array.calc_array_factor(2E9,step_size)
+array.calc_array_factor(f0,step_size)
 
 au = np.zeros((step_size,int(step_size/2)))
 

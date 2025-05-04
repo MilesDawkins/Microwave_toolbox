@@ -41,15 +41,17 @@ def find_closest_indices(list_of_numbers, target_value):
 
 #setup functions##############################################################################################################
 step_size = 360
+f0 = 5E9
 num_ele = 10
-x_spacing = (3E8/2E9)/3
+x_spacing = (3E8/f0)/3
+print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
 weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
 #calculation functions##############################################################################################################
 
 #calcualte dipole pattern
-dpp = mt.antenna_tools.create_dipole(2E9,step_size)
+dpp = mt.antenna_tools.create_dipole(f0,step_size)
 
 #setup array based on inputs
 ele_pos = np.zeros((num_ele,3))
@@ -61,7 +63,7 @@ for ele in range(num_ele):
 
 #calcualte array factor
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights)
-array.calc_array_factor(2E9,step_size)
+array.calc_array_factor(f0,step_size)
 
 #calcualte gain based on antenna pattern and array factor
 au = np.zeros((step_size,int(step_size/2)))
