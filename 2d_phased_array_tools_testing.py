@@ -66,8 +66,8 @@ az[0].set_title("Azimuth Cut")
 az[1].plot(theta-np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
 az[1].set_theta_zero_location("E")
 az[1].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
-az[0].set_rticks(np.arange(np.nanmax(au)-30,np.nanmax(au)+5,5))  # Less radial ticks
-az[0].set_rlabel_position(90)  # Move radial labels away from plotted line
+az[1].set_rticks(np.arange(np.nanmax(au)-30,np.nanmax(au)+5,5))  # Less radial ticks
+az[1].set_rlabel_position(90)  # Move radial labels away from plotted line
 az[1].set_title("Elevation Cut")
 
 #prepping mag array for 3d plotting
