@@ -9,12 +9,12 @@ import time
 ##############setup functions####################
 start_time = time.time()
 step_size = 300
-num_ele = 6**2
-x_spacing = (3E8/2E9)/2
-steer_theta = -0
-steer_phi = -30
+num_ele = 10
+x_spacing = (3E8/2E9)/3
+steer_theta = -00
 
-#weights = [0.357,0.485,0.706,0.890,1,1,0.890,0.706, 0.485,0.357]
+
+weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
 #################calulation functions###########################
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
@@ -23,24 +23,21 @@ ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
 
-delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/2E9))
-delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_phi)))/(3E8/2E9))
-
-for row in range(int(np.sqrt(num_ele))):
-    for col in range(int(np.sqrt(num_ele))):
-     print(((row*int(np.sqrt(num_ele)))+(col)))
-     ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
-     ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
-     phases[((row*int(np.sqrt(num_ele)))+(col))] = col*delta_phi_x + row*delta_phi_y
+for ele in range(num_ele):
+     ele_pos[ele][0] = start_x+ele*x_spacing
+     x = ele_pos[ele][0]
+     #phases[ele] = np.cos((np.sqrt(x**2)*np.pi)/(3E8/2E9))-np.cos((np.sqrt((x-0.02)**2)*np.pi)/(3E8/2E9))
+     
+     
 
 print(ele_pos)
-array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
+array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights,phases = phases)
 array.calc_array_factor(2E9,step_size)
 
 au = np.zeros((step_size,int(step_size/2)))
 
 for p in range(step_size):
-    au[p] = [10*np.log10(np.abs(x * y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
+    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
     
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
@@ -49,7 +46,14 @@ print("--- %s seconds ---" % (time.time() - start_time))
 ##################plotting functions#######################
 phi_a = np.array(phi)
 theta_a = np.array(theta)
-threshold = -10
+threshold = -20
+
+fig, ay = plot.subplots()
+ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
+print(np.nanmax(au)-25)
+plot.hlines(y=[np.nanmax(au)-25], xmin=np.min(phi-np.pi/2), xmax=np.max(phi-np.pi/2), colors=['r'], linestyles=['--'])
+plot.ylim(-20,40)
+plot.show()
 
 fig, ay = plot.subplots(subplot_kw={'projection': 'polar'})
 ay.plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
