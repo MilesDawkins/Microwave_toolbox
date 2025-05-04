@@ -8,10 +8,10 @@ import numpy as np
 f0 = 5E9
 step_size = 360
 num_ele = 4**2
-x_spacing = (3E8/f0)/2
+x_spacing = (3E8/f0)/4
 print("Element Spacing (M) = ",x_spacing)
-steer_theta = 0
-steer_phi = 0
+steer_theta = 30
+steer_phi = 40
 
 #calulation functions#############################################################################
 dpp = mt.antenna_tools.create_dipole(f0,step_size)
@@ -20,18 +20,18 @@ ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
 
-delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(-steer_phi)))/(3E8/f0))
-delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/f0))
-
-print("Progressive Z Phase Shift(deg) = ",np.degrees(delta_phi_x))
-print("Progressive X Phase Shift(deg) = ",np.degrees(delta_phi_y))
+delta_phi_x = (360*x_spacing*np.sin(np.radians(-steer_phi)))/(3E8/f0)
+delta_phi_y = (360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/f0)
+print("Progressive Z Phase Shift(deg) = ",(delta_phi_x))
+print("Progressive X Phase Shift(deg) = ",(delta_phi_y))
 
 for row in range(int(np.sqrt(num_ele))):
     for col in range(int(np.sqrt(num_ele))):
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
-     phases[((row*int(np.sqrt(num_ele)))+(col))] = col*delta_phi_x + row*delta_phi_y
-print(phases)
+     phases[((row*int(np.sqrt(num_ele)))+(col))] = col*np.radians(delta_phi_x) + row*np.radians(delta_phi_y)
+print("Element Phases = ", np.rad2deg(phases))
+
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
 array.calc_array_factor(f0,step_size)
 
@@ -53,7 +53,7 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 
 #create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array Directivity, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta))
+fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array Directivity, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta),fontweight='bold')
 
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("E")
@@ -95,13 +95,13 @@ N = N/Rmax
 az[2].remove()
 azs = fig.add_subplot(1,3,3, projection='3d')
 mycol = cm.jet(N)
-surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)
+surf = azs.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=mycol, linewidth=0.5, shade=False)
 limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
 azs.set_title("3D Radiation Pattern")
 azs.view_init(elev=30, azim=60)
 
-fig.set_size_inches(15, 5)
+fig.set_size_inches(15, 5.5)
 plot.show()
 

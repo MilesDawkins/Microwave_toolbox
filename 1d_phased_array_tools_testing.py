@@ -88,7 +88,7 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 
 #create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-fig.suptitle('1D Linear Chebyshev Array Directivity, N = '+str(num_ele)+", SLL = -25dB")
+fig.suptitle('1D Linear Chebyshev Array Directivity, N = '+str(num_ele)+", SLL = -25dB",fontweight='bold')
 
 #generate E plane Cut
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
@@ -146,13 +146,13 @@ N = N/Rmax
 az[2].remove()
 azs = fig.add_subplot(1,3,3, projection='3d')
 mycol = cm.jet(N)
-surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)
+surf = azs.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=mycol, linewidth=0.5, shade=False)
 limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
 azs.set_title("3D Radiation Pattern")
 azs.view_init(elev=30, azim=45)
 
-fig.set_size_inches(15, 5)
+fig.set_size_inches(15, 5.5)
 plot.show()
 
