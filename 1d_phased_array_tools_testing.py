@@ -88,7 +88,7 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 
 #create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-fig.suptitle('1D Linear Chebyshev Array, N = '+str(num_ele)+", SLL = -25dB")
+fig.suptitle('1D Linear Chebyshev Array Directivity, N = '+str(num_ele)+", SLL = -25dB")
 
 #generate E plane Cut
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])

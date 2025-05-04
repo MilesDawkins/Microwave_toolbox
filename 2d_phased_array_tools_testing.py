@@ -53,7 +53,7 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 
 #create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta))
+fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array Directivity, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta))
 
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("E")
