@@ -50,8 +50,8 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 #generate E plane cut
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
 az[0].plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-az[0].set_theta_zero_location("S")
-lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
+az[0].set_theta_zero_location("N")
+lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
 az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
 
 #generate H plane cut

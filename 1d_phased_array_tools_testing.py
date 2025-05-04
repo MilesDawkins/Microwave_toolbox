@@ -85,7 +85,7 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 #generate E plane cut
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
 az[0].plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-az[0].set_theta_zero_location("S")
+az[0].set_theta_zero_location("N")
 lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
 az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
 
@@ -94,11 +94,13 @@ limit_line = np.full(len(phi),np.nanmax(au)-25)
 az[0].plot(phi-np.pi/2,limit_line,color='r',linestyle='--')
 
 #plot HPBW lines
-hpa = phi[max([hp1,hp2])]-np.pi/2
-hpb = phi[min([hp1,hp2])]+np.pi/2
-hpbw = np.abs(hpa-hpb)
-print("HPBW(deg) = ",np.degrees(hpbw))
-az[0].vlines([hpa,hpb],np.nanmax(au)-40 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'))
+hpa = phi[max([hp1,hp2])]-3*np.pi/2
+hpb = phi[min([hp1,hp2])]+3*np.pi/2
+hpbw = np.degrees(np.abs(hpa-hpb))
+if hpbw >360:
+    hpbw = hpbw-360
+print("HPBW(deg) = ",(hpbw))
+az[0].vlines([-hpa,-hpb],np.nanmax(au)-40 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'))
 
 #generate H plane cut
 az[1].plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
@@ -124,7 +126,9 @@ x = mag * np.sin(theta_grid) * np.cos(phi_grid)
 y = mag * np.sin(theta_grid) * np.sin(phi_grid)
 z = mag * np.cos(theta_grid)
 N = np.sqrt(x**2 + y**2 + z**2)
-Rmax = np.max(N)
+Rmax = np.nanmax(N)
+if Rmax == 0:
+    Rmax = 1
 N = N/Rmax
 
 # Create the 3D plot
