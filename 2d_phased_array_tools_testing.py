@@ -10,8 +10,8 @@ step_size = 360
 num_ele = 4**2
 x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
-steer_theta = 30
-steer_phi = 0
+steer_theta = 00
+steer_phi = 20
 
 #calulation functions#############################################################################
 dpp = mt.antenna_tools.create_dipole(f0,step_size)
@@ -20,8 +20,8 @@ ele_pos = np.zeros((num_ele,3))
 start_x = -(num_ele/np.sqrt(num_ele)-1)*x_spacing/2
 phases = np.zeros(num_ele)
 
-delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/f0))
-delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_phi)))/(3E8/f0))
+delta_phi_x = np.radians((360*x_spacing*np.sin(np.radians(-steer_phi)))/(3E8/f0))
+delta_phi_y = np.radians((360*x_spacing*np.sin(np.radians(steer_theta)))/(3E8/f0))
 
 print("Progressive Z Phase Shift(deg) = ",np.degrees(delta_phi_x))
 print("Progressive X Phase Shift(deg) = ",np.degrees(delta_phi_y))
@@ -31,7 +31,7 @@ for row in range(int(np.sqrt(num_ele))):
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
      phases[((row*int(np.sqrt(num_ele)))+(col))] = col*delta_phi_x + row*delta_phi_y
-
+print(phases)
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
 array.calc_array_factor(f0,step_size)
 
@@ -43,27 +43,30 @@ for p in range(step_size):
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
 #plotting functions#################################################################################
+
 #create array variables for numpy plotting 
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
 
-#generate E plane cut
+#create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-az[0].plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
+fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta))
+
+az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("N")
-lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
-az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
+az[0].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
+az[0].set_title("Azimuth Cut")
 
 #generate H plane cut
-az[1].plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
-az[1].set_theta_zero_location("W")
-lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
-az[1].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
+az[1].plot(theta-np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az[1].set_theta_zero_location("E")
+az[1].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
+az[1].set_title("Elevation Cut")
 
 #prepping mag array for 3d plotting
 phi_a = np.array(phi)
-theta_a = np.array(theta)
-threshold = np.nanmax(au)-40
+theta_a = np.array(theta+np.pi)
+threshold = np.nanmax(au)-30
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
@@ -89,5 +92,9 @@ surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewid
 limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
+azs.set_title("3D Radiation Pattern")
+azs.view_init(elev=30, azim=60)
+
+fig.set_size_inches(15, 5)
 plot.show()
 

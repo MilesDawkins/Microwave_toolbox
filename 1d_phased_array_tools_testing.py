@@ -82,12 +82,15 @@ print("Max Gain (dBi) = ",max_gain)
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))
 
-#generate E plane cut
+#create figure
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
-az[0].plot(phi-np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
+fig.suptitle('1D Linear Chebyshev Array, N = '+str(num_ele)+", SLL = -25dB")
+
+#generate E plane Cut
+az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("N")
-lines, labels = plot.thetagrids(range(0, 360, 10),range(180, -180, -10))
-az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
+az[0].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
+az[0].set_title("Azimuth Cut")
 
 #create limit line for chebyschev SL level
 limit_line = np.full(len(phi),np.nanmax(au)-25)
@@ -100,18 +103,18 @@ hpbw = np.degrees(np.abs(hpa-hpb))
 if hpbw >360:
     hpbw = hpbw-360
 print("HPBW(deg) = ",(hpbw))
-az[0].vlines([-hpa,-hpb],np.nanmax(au)-40 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'))
+az[0].vlines([-hpa,-hpb],np.nanmax(au)-45 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'), linestyles = 'dashed')
 
 #generate H plane cut
-az[1].plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
-az[1].set_theta_zero_location("W")
-lines, labels = plot.thetagrids(range(0, 360, 10),range(-180, 180, 10))
-az[1].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
+az[1].plot(theta-np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az[1].set_theta_zero_location("E")
+az[1].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
+az[1].set_title("Elevation Cut")
 
 #prepping mag array for 3d plotting
 phi_a = np.array(phi)
-theta_a = np.array(theta)
-threshold = np.nanmax(au)-40
+theta_a = np.array(theta+np.pi)
+threshold = np.nanmax(au)-45
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)
@@ -139,5 +142,9 @@ surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewid
 limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
+azs.set_title("3D Radiation Pattern")
+azs.view_init(elev=30, azim=45)
+
+fig.set_size_inches(15, 5)
 plot.show()
 
