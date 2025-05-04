@@ -92,9 +92,9 @@ limit_line = np.full(len(phi),np.nanmax(au)-25)
 az[0].plot(phi-np.pi/2,limit_line,color='r',linestyle='--')
 
 #plot HPBW lines
-hpa = phi[hp1]+np.pi/2
-hpb = phi[hp2]-np.pi/2
-hpbw = hpa-hpb
+hpa = phi[max([hp1,hp2])]-np.pi/2
+hpb = phi[min([hp1,hp2])]+np.pi/2
+hpbw = np.abs(hpa-hpb)
 print("HPBW(deg) = ",np.degrees(hpbw))
 az[0].vlines([hpa,hpb],np.nanmax(au)-40 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'))
 
