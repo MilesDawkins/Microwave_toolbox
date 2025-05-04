@@ -10,8 +10,8 @@ step_size = 360
 num_ele = 4**2
 x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
-steer_theta = 00
-steer_phi = 20
+steer_theta = 0
+steer_phi = 0
 
 #calulation functions#############################################################################
 dpp = mt.antenna_tools.create_dipole(f0,step_size)
@@ -53,7 +53,7 @@ fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
 fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar Dipole Array, Phi = '+str(steer_phi)+', Theta = '+str(steer_theta))
 
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-az[0].set_theta_zero_location("N")
+az[0].set_theta_zero_location("E")
 az[0].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
 az[0].set_title("Azimuth Cut")
 

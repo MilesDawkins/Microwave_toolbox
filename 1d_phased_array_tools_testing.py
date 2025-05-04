@@ -46,7 +46,7 @@ num_ele = 10
 x_spacing = (3E8/f0)/3
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
-weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
+#weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
 #calculation functions##############################################################################################################
 
@@ -88,7 +88,7 @@ fig.suptitle('1D Linear Chebyshev Array, N = '+str(num_ele)+", SLL = -25dB")
 
 #generate E plane Cut
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
-az[0].set_theta_zero_location("N")
+az[0].set_theta_zero_location("E")
 az[0].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
 az[0].set_title("Azimuth Cut")
 
