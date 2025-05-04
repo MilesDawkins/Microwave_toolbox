@@ -46,7 +46,7 @@ num_ele = 10
 x_spacing = (3E8/f0)/3
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
-#weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
+weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
 #calculation functions##############################################################################################################
 
@@ -70,10 +70,14 @@ au = np.zeros((step_size,int(step_size/2)))
 for p in range(step_size):
     au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #-10*np.log10(num_ele)
 
+print("Total Array Gain (dBi) = ",np.nanmax(au))
+
+#normalizing gain
+au = au-np.nanmax(au)
+
 #calculation HPBW
 E_cut = [au[x][int(step_size/4)] for x in range(len(au))]
 max_gain = np.nanmax(E_cut)
-print("Max Gain (dBi) = ",max_gain)
 [hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
 
 #plotting functions##############################################################################################################

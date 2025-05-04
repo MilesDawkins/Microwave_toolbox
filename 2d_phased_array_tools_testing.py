@@ -42,6 +42,9 @@ for p in range(step_size):
     
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
+#normalizing gain
+au = au-np.nanmax(au)
+
 #plotting functions#################################################################################
 
 #create array variables for numpy plotting 
