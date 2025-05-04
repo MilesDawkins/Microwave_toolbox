@@ -95,7 +95,7 @@ N = N/Rmax
 az[2].remove()
 azs = fig.add_subplot(1,3,3, projection='3d')
 mycol = cm.jet(N)
-surf = azs.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=mycol, linewidth=0.5, shade=False)
+surf = azs.plot_surface(x, y, z, rstride=3, cstride=3, facecolors=mycol, linewidth=0.5, shade=False)
 limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
