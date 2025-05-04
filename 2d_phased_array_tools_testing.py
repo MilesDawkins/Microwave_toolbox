@@ -1,13 +1,11 @@
 import microwave_toolbox as mt
 import matplotlib.pyplot as plot
-import matplotlib.patches as patches
 from matplotlib import cm, colors
 import numpy as np
-import os
-import time
+
 
 #setup functions################################################################################
-start_time = time.time()
+
 step_size = 360
 num_ele = 5**2
 x_spacing = (3E8/2E9)/2
@@ -42,7 +40,6 @@ for p in range(step_size):
     
 
 #plotting functions#################################################################################
-print("--- %s seconds ---" % (time.time() - start_time))
 #create array variables for numpy plotting 
 phi = np.linspace(0,2*np.pi,step_size)
 theta = np.linspace(0,np.pi,int(step_size/2))

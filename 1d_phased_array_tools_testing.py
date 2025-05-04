@@ -1,10 +1,43 @@
 import microwave_toolbox as mt
 import matplotlib.pyplot as plot
-import matplotlib.patches as patches
 from matplotlib import cm, colors
 import numpy as np
-import os
-import time
+
+
+def find_closest_indices(list_of_numbers, target_value):
+    if not list_of_numbers:
+        return "The list is empty."
+    
+    if len(list_of_numbers) == 1:
+        return 0, "List has only one element"
+
+    closest_indices = []
+    min_diff1 = float('inf')
+    min_diff2 = float('inf')
+    index1 = -1
+    index2 = -1
+    
+    for index, number in enumerate(list_of_numbers):
+        diff = abs(number - target_value)
+        
+        if diff < min_diff1:
+            min_diff2 = min_diff1
+            min_diff1 = diff
+            index2 = index1
+            index1 = index
+        elif diff == min_diff1:
+             if index != index1:
+                min_diff2 = diff
+                index2 = index
+        elif diff < min_diff2:
+            min_diff2 = diff
+            index2 = index
+            
+    if index2 != -1:
+        closest_indices = [index1, index2]
+    else:
+        closest_indices = [index1]
+    return closest_indices
 
 #setup functions##############################################################################################################
 step_size = 360
@@ -14,7 +47,6 @@ weights = np.ones(num_ele)
 weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 
 #calculation functions##############################################################################################################
-start_time = time.time()
 
 #calcualte dipole pattern
 dpp = mt.antenna_tools.create_dipole(2E9,step_size)
@@ -36,7 +68,12 @@ au = np.zeros((step_size,int(step_size/2)))
 for p in range(step_size):
     au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #-10*np.log10(num_ele)
 
-print("--- %s seconds ---" % (time.time() - start_time))
+#calculation HPBW
+E_cut = [au[x][int(step_size/4)] for x in range(len(au))]
+max_gain = np.nanmax(E_cut)
+print("Max Gain (dBi) = ",max_gain)
+[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
+
 #plotting functions##############################################################################################################
 
 #create array variables for numpy plotting 
@@ -53,6 +90,13 @@ az[0].set_rlim(np.nanmax(au)-40,np.nanmax(au)+5)
 #create limit line for chebyschev SL level
 limit_line = np.full(len(phi),np.nanmax(au)-25)
 az[0].plot(phi-np.pi/2,limit_line,color='r',linestyle='--')
+
+#plot HPBW lines
+hpa = phi[hp1]+np.pi/2
+hpb = phi[hp2]-np.pi/2
+hpbw = hpa-hpb
+print("HPBW(deg) = ",np.degrees(hpbw))
+az[0].vlines([hpa,hpb],np.nanmax(au)-40 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'))
 
 #generate H plane cut
 az[1].plot(theta+np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
@@ -72,7 +116,6 @@ mag[nan_mask|inf_mask|less_mask] = threshold
 mag = mag - threshold
 mag = mag-np.min(mag)
 theta_grid, phi_grid = np.meshgrid(theta_a, phi_a)
-print(mag)
 
 # Convert to Cartesian coordinates
 x = mag * np.sin(theta_grid) * np.cos(phi_grid)
@@ -91,3 +134,4 @@ limits = np.r_[azs.get_xlim3d(), azs.get_ylim3d(), azs.get_zlim3d()]
 limits = [np.min(limits, axis=0), np.max(limits, axis=0)]
 azs.set(xlim3d=limits, ylim3d=limits, zlim3d=limits, box_aspect=(1, 1, 1))
 plot.show()
+
