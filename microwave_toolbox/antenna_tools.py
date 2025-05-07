@@ -62,7 +62,7 @@ def create_isotropic(f0,steps):
             iso.rad_intensity[p][t] =  1
     return iso
 
-def create_cos(f0,power,steps):
+def create_cos(f0,power,steps, norm_vec = None):
     iso = antenna()
     phi = np.linspace(0,2*np.pi,steps)
     theta = np.linspace(0,np.pi,int(steps/2))
@@ -77,7 +77,7 @@ def create_cos(f0,power,steps):
     for t in range(len(iso.theta)):
         for p in range(len(iso.phi)):
                 iso.rad_intensity[p][t] =  np.cos(theta[t])**power
-           
+
     return iso
 
 
