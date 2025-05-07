@@ -8,11 +8,11 @@ import numpy as np
 f0 = 5E9
 step_size = 360
 num_ele = 4**2
-x_spacing = (3E8/f0)/4
+x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
-steer_theta = 30
-steer_phi = 40
-
+steer_theta = 0
+steer_phi = 0
+weights = np.ones(num_ele)
 #calulation functions#############################################################################
 dpp = mt.antenna_tools.create_dipole(f0,step_size)
 
@@ -29,16 +29,20 @@ for row in range(int(np.sqrt(num_ele))):
     for col in range(int(np.sqrt(num_ele))):
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
+     if start_x+col*x_spacing < 0:
+        weights[((row*int(np.sqrt(num_ele)))+(col))] = -1
+     else:
+        weights[((row*int(np.sqrt(num_ele)))+(col))] = 1
      phases[((row*int(np.sqrt(num_ele)))+(col))] = col*np.radians(delta_phi_x) + row*np.radians(delta_phi_y)
 print("Element Phases = ", np.rad2deg(phases))
 
-array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases)
+array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases,weights = weights)
 array.calc_array_factor(f0,step_size)
 
 au = np.zeros((step_size,int(step_size/2)))
 
 for p in range(step_size):
-    au[p] = [10*np.log10(np.abs(x * y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
+    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) -10*np.log10(num_ele) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
     
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
@@ -57,16 +61,16 @@ fig.suptitle(str(int(np.sqrt(num_ele)))+'x'+str(int(np.sqrt(num_ele)))+' Planar 
 
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("E")
-az[0].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
-az[0].set_rticks(np.arange(np.nanmax(au)-30,np.nanmax(au)+5,5))  # Less radial ticks
+az[0].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
+az[0].set_rticks(np.arange(np.nanmax(au)-45,np.nanmax(au)+5,5))  # Less radial ticks
 az[0].set_rlabel_position(90)  # Move radial labels away from plotted line
 az[0].set_title("Azimuth Cut")
 
 #generate H plane cut
 az[1].plot(theta-np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
 az[1].set_theta_zero_location("E")
-az[1].set_rlim(np.nanmax(au)-30,np.nanmax(au)+5)
-az[1].set_rticks(np.arange(np.nanmax(au)-30,np.nanmax(au)+5,5))  # Less radial ticks
+az[1].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
+az[1].set_rticks(np.arange(np.nanmax(au)-45,np.nanmax(au)+5,5))  # Less radial ticks
 az[1].set_rlabel_position(90)  # Move radial labels away from plotted line
 az[1].set_title("Elevation Cut")
 

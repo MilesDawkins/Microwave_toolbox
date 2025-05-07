@@ -42,16 +42,18 @@ def find_closest_indices(list_of_numbers, target_value):
 #setup functions##############################################################################################################
 step_size = 360
 f0 = 5E9
-num_ele = 10
-x_spacing = (3E8/f0)/3
+num_ele = 6
+plot_thresh = -45
+x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
-weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
+#weights = [-0.39547,-0.506,-0.7217,-0.8995,-1,1,0.8995,0.7217, 0.506,0.39547]
+#weights = [-1,-1,-1,-1,-1,1,1,1,1,1]
 
 #calculation functions##############################################################################################################
 
 #calcualte dipole pattern
-dpp = mt.antenna_tools.create_dipole(f0,step_size)
+dpp = mt.antenna_tools.create_cos(f0,3,step_size)
 
 #setup array based on inputs
 ele_pos = np.zeros((num_ele,3))
@@ -68,7 +70,7 @@ array.calc_array_factor(f0,step_size)
 #calcualte gain based on antenna pattern and array factor
 au = np.zeros((step_size,int(step_size/2)))
 for p in range(step_size):
-    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #-10*np.log10(num_ele)
+    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) -10*np.log10(num_ele) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #
 
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
@@ -78,7 +80,7 @@ au = au-np.nanmax(au)
 #calculation HPBW
 E_cut = [au[x][int(step_size/4)] for x in range(len(au))]
 max_gain = np.nanmax(E_cut)
-[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
+#[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
 
 #plotting functions##############################################################################################################
 
@@ -90,40 +92,42 @@ theta = np.linspace(0,np.pi,int(step_size/2))
 fig, az = plot.subplots(1,3,subplot_kw={'projection': 'polar'})
 fig.suptitle('1D Linear Chebyshev Array Normalized Directivity (dB), N = '+str(num_ele)+", SLL = -25dB",fontweight='bold')
 #fig.suptitle('1D Linear Array Normalized Directivity (dB), N = '+str(num_ele),fontweight='bold')
+#fig.suptitle('Single Dipole Element Normalized Radiation Pattern (dB)',fontweight='bold')
 
 #generate E plane Cut
 az[0].plot(phi+np.pi/2,[au[x][int(step_size/4)] for x in range(len(au))])
 az[0].set_theta_zero_location("E")
-az[0].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
-az[0].set_rticks(np.arange(np.nanmax(au)-45,np.nanmax(au)+5,5))  # Less radial ticks
+az[0].set_rlim(np.nanmax(au)+plot_thresh,np.nanmax(au)+5)
+az[0].set_rticks(np.arange(np.nanmax(au)+plot_thresh,np.nanmax(au)+5,5))  # Less radial ticks
 az[0].set_rlabel_position(90)  # Move radial labels away from plotted line
 az[0].set_title("Azimuth Cut")
 
-#create limit line for chebyschev SL level
-limit_line = np.full(len(phi),np.nanmax(au)-25)
-az[0].plot(phi-np.pi/2,limit_line,color='r',linestyle='--')
+if(0):
+    #create limit line for chebyschev SL level
+    limit_line = np.full(len(phi),np.nanmax(au)-25)
+    az[0].plot(phi,limit_line,color='r',linestyle='--')
 
-#plot HPBW lines
-hpa = phi[max([hp1,hp2])]-3*np.pi/2
-hpb = phi[min([hp1,hp2])]+3*np.pi/2
-hpbw = np.degrees(np.abs(hpa-hpb))
-if hpbw >360:
-    hpbw = hpbw-360
-print("HPBW(deg) = ",(hpbw))
-az[0].vlines([-hpa,-hpb],np.nanmax(au)-45 ,np.nanmax(au)+5, zorder=3, colors = ('k','k'), linestyles = 'dashed')
+    #plot HPBW lines
+    hpa = phi[max([hp1,hp2])]-3*np.pi/2
+    hpb = phi[min([hp1,hp2])]+3*np.pi/2
+    hpbw = np.degrees(np.abs(hpa-hpb))
+    if hpbw >360:
+        hpbw = hpbw-360
+    print("HPBW(deg) = ",(hpbw))
+    az[0].vlines([-hpa,-hpb],np.nanmax(au)+plot_thresh ,np.nanmax(au)+5, zorder=3, colors = ('k','k'), linestyles = 'dashed')
 
 #generate H plane cut
-az[1].plot(theta-np.pi/2,[au[int(step_size/4)][x] for x in range(len(au[0]))])
+az[1].plot(theta,[au[int(step_size/2)][x] for x in range(len(au[0]))])
 az[1].set_theta_zero_location("E")
-az[1].set_rlim(np.nanmax(au)-45,np.nanmax(au)+5)
-az[1].set_rticks(np.arange(np.nanmax(au)-45,np.nanmax(au)+5,5))  # Less radial ticks
+az[1].set_rlim(np.nanmax(au)+plot_thresh,np.nanmax(au)+5)
+az[1].set_rticks(np.arange(np.nanmax(au)+plot_thresh,np.nanmax(au)+5,5))  # Less radial ticks
 az[1].set_rlabel_position(90)  # Move radial labels away from plotted line
 az[1].set_title("Elevation Cut")
 
 #prepping mag array for 3d plotting
 phi_a = np.array(phi)
-theta_a = np.array(theta+np.pi)
-threshold = np.nanmax(au)-45
+theta_a = np.array(theta)
+threshold = np.nanmax(au)+plot_thresh
 mag = np.array(au)
 nan_mask = np.isnan(mag)
 inf_mask = np.isinf(mag)

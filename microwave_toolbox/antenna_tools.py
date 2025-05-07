@@ -43,7 +43,6 @@ def create_dipole(f0,steps):
     for t in range(len(dp.theta)):
         for p in range(len(dp.phi)):
             dp.rad_intensity[p][t] =  1.64 * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
-            #eta*(dp.p_in)/(8*np.pi**2)
     return dp
 
 def create_isotropic(f0,steps):
@@ -52,7 +51,6 @@ def create_isotropic(f0,steps):
     theta = np.linspace(0,np.pi,int(steps/2))
     iso.phi = phi
     iso.theta = theta
-    
 
     for p in range(len(iso.phi)):
         iso.rad_intensity.append([[None]])
@@ -63,6 +61,25 @@ def create_isotropic(f0,steps):
         for p in range(len(iso.phi)):
             iso.rad_intensity[p][t] =  1
     return iso
+
+def create_cos(f0,power,steps):
+    iso = antenna()
+    phi = np.linspace(0,2*np.pi,steps)
+    theta = np.linspace(0,np.pi,int(steps/2))
+    iso.phi = phi
+    iso.theta = theta
+
+    for p in range(len(iso.phi)):
+        iso.rad_intensity.append([[None]])
+        for t in range(len(iso.theta-1)):
+            iso.rad_intensity[p].append([None])
+
+    for t in range(len(iso.theta)):
+        for p in range(len(iso.phi)):
+                iso.rad_intensity[p][t] =  np.cos(theta[t])**power
+           
+    return iso
+
 
 
 #class for defining antenna measurements in a chamber. arguments can be gain over frequency with az/el cuts
