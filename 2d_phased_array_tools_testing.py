@@ -6,9 +6,9 @@ import numpy as np
 
 #setup functions################################################################################
 f0 = 5E9
-step_size = 360
-num_ele = 4**2
-x_spacing = (3E8/f0)/2
+step_size = 640
+num_ele = 10**2
+x_spacing = (3E8/f0)/5
 print("Element Spacing (M) = ",x_spacing)
 steer_theta = 0
 steer_phi = 0
@@ -29,10 +29,6 @@ for row in range(int(np.sqrt(num_ele))):
     for col in range(int(np.sqrt(num_ele))):
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][2] = start_x+row*x_spacing
      ele_pos[((row*int(np.sqrt(num_ele)))+(col))][0] = start_x+col*x_spacing
-     if start_x+col*x_spacing < 0:
-        weights[((row*int(np.sqrt(num_ele)))+(col))] = -1
-     else:
-        weights[((row*int(np.sqrt(num_ele)))+(col))] = 1
      phases[((row*int(np.sqrt(num_ele)))+(col))] = col*np.radians(delta_phi_x) + row*np.radians(delta_phi_y)
 print("Element Phases = ", np.rad2deg(phases))
 

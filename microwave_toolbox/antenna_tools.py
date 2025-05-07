@@ -11,12 +11,12 @@ class antenna():
     def __init__(self, file_path = None, gain = None, frequencies = None):
             # create class instance globals
             self.sub_type = "antenna"
-            self.frequencies = []
+            self.frequencies = np.array([])
             self.freq_max = 0
             self.freq_min = 0
-            self.phi = []
-            self.theta = []
-            self.rad_intensity = [[[]*1]*1]*1
+            self.phi = np.array([])
+            self.theta = np.array([])
+            self.rad_intensity = np.array([1,1])
             self.p_in = 1
             self.coor_system = "Spherical"
             self.version = ""
@@ -26,59 +26,35 @@ class antenna():
 
 
 def create_dipole(f0,steps):
-    dp = antenna()
-    phi = np.linspace(0,2*np.pi,steps)
-    theta = np.linspace(0,np.pi,int(steps/2))
-    dp.phi = phi
-    dp.theta = theta
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
     l = (3E8/f0)/2
     eta = 120*np.pi
     beta = (2*np.pi)/(3E8/f0)
-
-    for p in range(len(dp.phi)):
-        dp.rad_intensity.append([[None]])
-        for t in range(len(dp.theta-1)):
-            dp.rad_intensity[p].append([None])
-
-    for t in range(len(dp.theta)):
-        for p in range(len(dp.phi)):
-            dp.rad_intensity[p][t] =  1.64 * (((np.cos(beta*l/2*np.cos(theta[t])))-np.cos(beta*l/2))/np.sin(theta[t]))**2
-    return dp
+    ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
+    ant.rad_intensity = 1.64 * (((np.cos(beta*l/2*np.cos(theta)))-np.cos(beta*l/2))/np.sin(theta))**2
+    print(len(ant.rad_intensity))
+    return ant
 
 def create_isotropic(f0,steps):
-    iso = antenna()
-    phi = np.linspace(0,2*np.pi,steps)
-    theta = np.linspace(0,np.pi,int(steps/2))
-    iso.phi = phi
-    iso.theta = theta
-
-    for p in range(len(iso.phi)):
-        iso.rad_intensity.append([[None]])
-        for t in range(len(iso.theta-1)):
-            iso.rad_intensity[p].append([None])
-
-    for t in range(len(iso.theta)):
-        for p in range(len(iso.phi)):
-            iso.rad_intensity[p][t] =  1
-    return iso
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    ant.rad_intensity=np.ones([len(ant.phi),len(ant.theta)])
+    print(len(ant.rad_intensity))
+    return ant
 
 def create_cos(f0,power,steps, norm_vec = None):
-    iso = antenna()
-    phi = np.linspace(0,2*np.pi,steps)
-    theta = np.linspace(0,np.pi,int(steps/2))
-    iso.phi = phi
-    iso.theta = theta
-
-    for p in range(len(iso.phi)):
-        iso.rad_intensity.append([[None]])
-        for t in range(len(iso.theta-1)):
-            iso.rad_intensity[p].append([None])
-
-    for t in range(len(iso.theta)):
-        for p in range(len(iso.phi)):
-                iso.rad_intensity[p][t] =  np.cos(theta[t])**power
-
-    return iso
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
+    ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
+    ant.rad_intensity = np.cos(theta)**power
+    print(len(ant.rad_intensity))
+    return ant
 
 
 
