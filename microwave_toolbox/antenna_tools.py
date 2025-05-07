@@ -42,6 +42,7 @@ def create_isotropic(f0,steps):
     ant = antenna()
     ant.phi = np.linspace(0,2*np.pi,steps)
     ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
     ant.rad_intensity=np.ones([len(ant.phi),len(ant.theta)])
     print(len(ant.rad_intensity))
     return ant

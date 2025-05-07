@@ -34,12 +34,7 @@ print("Element Phases = ", np.rad2deg(phases))
 
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size, phases= phases,weights = weights)
 array.calc_array_factor(f0,step_size)
-
-au = np.zeros((step_size,int(step_size/2)))
-
-for p in range(step_size):
-    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) -10*np.log10(num_ele) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])]
-    
+au = (20*np.log10(np.abs(array.array_factor))+10*np.log10(np.abs(dpp.rad_intensity))) -10*np.log10(num_ele)
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
 #normalizing gain

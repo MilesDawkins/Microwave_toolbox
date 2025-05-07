@@ -14,6 +14,7 @@ class network():
             self.freq_max = 0
             self.freq_min = 0
             self.file_data = [[[]*1]*1]*1
+            self.network_data = np.array([])
             self.version = ""
             self.freq_unit = ""
             self.format = ""

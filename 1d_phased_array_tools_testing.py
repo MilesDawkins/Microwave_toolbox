@@ -40,14 +40,14 @@ def find_closest_indices(list_of_numbers, target_value):
     return closest_indices
 
 #setup functions##############################################################################################################
-step_size = 360
+step_size = 1000
 f0 = 5E9
-num_ele = 10
-plot_thresh = -45
+num_ele = 100
+plot_thresh = -80
 x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
-weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
+#weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 #weights = [-1,-1,-1,-1,-1,1,1,1,1,1]
 
 #calculation functions##############################################################################################################
@@ -68,11 +68,7 @@ array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weig
 array.calc_array_factor(f0,step_size)
 
 #calcualte gain based on antenna pattern and array factor
-au = np.zeros((step_size,int(step_size/2)))
-au = 10*np.log10(dpp.rad_intensity)
-for p in range(step_size):
-    au[p] = [20*np.log10(np.abs(x))+10*np.log10(np.abs(y)) -10*np.log10(num_ele) for x,y in zip(array.array_factor[p],dpp.rad_intensity[p])] #
-
+au = (20*np.log10(np.abs(array.array_factor))+10*np.log10(np.abs(dpp.rad_intensity))) -10*np.log10(num_ele)
 print("Total Array Gain (dBi) = ",np.nanmax(au))
 
 #normalizing gain

@@ -12,7 +12,7 @@ class element_array:
         self.element_coor = element_coor
         self.array_factor = np.ones((steps, int(steps/2)),dtype=complex)
         self.num_elements = len(element_coor)
-
+        self.phases = np.zeros(self.num_elements)
         if weights is not None:
             self.weights = weights
         else:
@@ -35,12 +35,19 @@ class element_array:
             element_sum += self.weights[element] * np.e ** ((wave_phase + self.phases[element]) * 1j)                  # Element contribution = Amp * e^j(Phase + Phase Weight)
         self.array_factor = element_sum
 
+    def calc_steering_phases(self,freq,phi,theta):
+        Lambda = 3e8 / freq
+        phi = np.radians(phi)
+        theta = np.radians(theta)
+        for ele in range(self.num_elements):
+            phases = 1
+            self.phases = phases
 
-    
+
     def calc_wave_phase(self,ele_coor:list, Lambda, theta, phi):
 
         phaseConstant = (2 * np.pi / Lambda)
-
+        
         xVector = ele_coor[0] * np.sin(theta) * np.cos(phi)
         yVector = ele_coor[1] * np.sin(theta) * np.sin(phi)
         zVector = ele_coor[2] * np.cos(theta)
