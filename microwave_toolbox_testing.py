@@ -14,9 +14,10 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 freqs = np.linspace(10E9, 10.01E9,1000)
 bjt = mt.system_tools.network(file)
 
-file_data = np.zeros([2,2,1,2])
+file_data = np.zeros([2,2,4,2])
 print(np.shape(file_data))
-np.append(file_data[0,0],[[0,8]],axis=0)
-print(file_data[0,0])
-
+print(np.shape(file_data[0][0][0]))
+print(np.shape([0,0]))
+file_data = np.append(file_data[0,0,2],(0,8),axis = 0)
+print(file_data)
 

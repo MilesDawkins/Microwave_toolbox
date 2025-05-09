@@ -42,12 +42,12 @@ def find_closest_indices(list_of_numbers, target_value):
 #setup functions##############################################################################################################
 step_size = 1000
 f0 = 5E9
-num_ele = 100
-plot_thresh = -80
+num_ele = 10
+plot_thresh = -40
 x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
-#weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
+weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 #weights = [-1,-1,-1,-1,-1,1,1,1,1,1]
 
 #calculation functions##############################################################################################################

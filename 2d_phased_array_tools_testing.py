@@ -8,10 +8,10 @@ import numpy as np
 f0 = 5E9
 step_size = 640
 num_ele = 10**2
-x_spacing = (3E8/f0)/5
+x_spacing = (3E8/f0)/2
 print("Element Spacing (M) = ",x_spacing)
-steer_theta = 0
-steer_phi = 0
+steer_theta = 20
+steer_phi = 20
 weights = np.ones(num_ele)
 #calulation functions#############################################################################
 dpp = mt.antenna_tools.create_dipole(f0,step_size)
