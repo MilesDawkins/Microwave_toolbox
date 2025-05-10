@@ -95,7 +95,7 @@ class network():
     def read_snp(self,file_path):
 
         self.file_name , self.ext = os.path.splitext(file_path)
-        first_network_data = True
+        first_file_line = True
 
         with open(file_path, 'r') as file:
             for line in file:
@@ -128,12 +128,12 @@ class network():
 
                 else:
                     # Parse network data lines
-                    network_data = list(map(float, line.split()))
-                    freq = network_data[0]
+                    file_line = list(map(float, line.split()))
+                    freq = file_line[0]
 
                     #determine number of ports and set rows and columns of data accordingly base on number of data points in first row
-                    if first_network_data == True:
-                        numport = np.sqrt((len(network_data)-1)/2)
+                    if first_file_line == True:
+                        numport = np.sqrt((len(file_line)-1)/2)
                         if numport % 1 != 0:
                             raise ValueError("Non integer number of ports detected")
                         
@@ -145,21 +145,22 @@ class network():
                                 self.file_data[i].append([])
                                 
 
-                        first_network_data  = False
+                        first_file_line  = False
 
 
                     # determine file type and extract data   
                     # note:.s2p file types have different sequence than all other sNp file types (y tho???)
+                    #this exploits the complex datas type to store 2 variables for fast computation later on
                     if self.ext[2] == '2':
-                        self.file_data[0][0].append([network_data[1], network_data[2]])
-                        self.file_data[1][0].append([network_data[3], network_data[4]])
-                        self.file_data[0][1].append([network_data[5], network_data[6]])
-                        self.file_data[1][1].append([network_data[7], network_data[8]])
+                        self.file_data[0][0].append(file_line[1]+1j*file_line[2])
+                        self.file_data[1][0].append(file_line[3]+1J*file_line[4])
+                        self.file_data[0][1].append(file_line[5]+1J*file_line[6])
+                        self.file_data[1][1].append(file_line[7]+1J*file_line[8])
 
                     elif self.num_ports != 0 and self.num_ports !=2:
                         for i in range(self.num_ports):
                             for j in range(self.num_ports): 
-                                self.file_data[i][j].append(network_data[i*self.num_ports*2 + 2*j+1], network_data[i*self.num_ports*2 + 2*j+2])
+                                self.file_data[i][j].append(file_line[i*self.num_ports*2 + 2*j+1]+1J*file_line[i*self.num_ports*2 + 2*j+2])
                         else:
                              raise ValueError("Data Format Unsupported")
                     else:
@@ -173,6 +174,7 @@ class network():
                         self.frequencies.append(1E3*freq)
                     elif self.freq_unit == "HZ":
                         self.frequencies.append(freq)
+        self.network_data = np.array(self.file_data)
         return
 
     def calc_dbmag(self):
