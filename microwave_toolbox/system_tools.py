@@ -13,8 +13,7 @@ class network():
             self.frequencies = []
             self.freq_max = 0
             self.freq_min = 0
-            self.file_data = [[[]*1]*1]*1
-            self.network_data = np.array([])
+            self.file_data = []
             self.version = ""
             self.freq_unit = ""
             self.format = ""
@@ -142,7 +141,7 @@ class network():
 
                         for i in range(self.num_ports):
                             self.file_data.append([[]])
-                            for j in range(self.num_ports):
+                            for j in range(self.num_ports-1):
                                 self.file_data[i].append([])
                                 
 
