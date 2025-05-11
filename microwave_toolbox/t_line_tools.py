@@ -18,7 +18,8 @@ class microstrip():
                 self.zl = 0
 
         if zl_in is not None:
-            self.zl = zl_in     
+            self.zl = zl_in   
+            self.typem = "loaded"  
         
         self.sub_type = "microstrip"
         self.zo=zo
@@ -116,12 +117,9 @@ class microstrip():
             
             
         else: 
-            if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
-                gamma_in = (self.input_z(freqs,self.length,self.zl)-50)/(self.input_z(freqs,self.length,self.zl)+50)
-            else:
-                gamma_in = (self.input_z(freqs,self.length,self.zl)-50)/(self.input_z(freqs,self.length,self.zl)+50)
+            gamma_in = (self.input_z(freqs,self.length,self.zl)-50)/(self.input_z(freqs,self.length,self.zl)+50)
             #s11
-            self.network.file_data=np.abs(gamma_in) + 1j*((180/np.pi)*cm.phase(gamma_in))
+            self.network.file_data=np.abs(gamma_in) + 1j*((180/np.pi)*np.angle(gamma_in))
                
 
     def wavelength(self,frequency):
@@ -131,9 +129,9 @@ class microstrip():
     def input_z(self,frequency,length,zl):
         lambda_line = self.vp_line/frequency
         
-        if(zl == 0):
+        if((type(zl) == int) and (zl == 0)):
             self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
-        elif(zl == np.inf):
+        elif((type(zl) == int) and (zl == np.inf)):
             self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/lambda_line)*length))
             
         else:

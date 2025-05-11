@@ -43,14 +43,14 @@ class network():
                 if num_ports != 1:
                     for i in range(self.num_ports):
                         for j in range(self.num_ports): 
-                            for f in range(len(frequencies)-1):
+                            for f in range(len(frequencies)):
                                 if s_user is not None:
                                     self.file_data[i][j].append(s_user[i][j][f])
                                 else:
                                     self.file_data[i][j].append(None)
 
                 else:
-                    for f in range(len(frequencies)-1):
+                    for f in range(len(frequencies)):
                         if s_user is not None:
                             self.file_data.append(s_user[f])
                         else:
@@ -169,16 +169,15 @@ class network():
 
         temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
 
-        if self.num_ports != 1:
-            if self.format == "DB":  
-                temp = np.real(self.network_data)
-            elif self.format == "RI":  
-                temp = 20*np.log10(np.abs(self.network_data))
-            elif self.format == "MA":  
-                temp=20*np.log10(np.real(self.network_data))
-                
-            elif self.format == "ABCD":
-                temp=20*np.log10(np.abs(self.complex))
+        if self.format == "DB":  
+            temp = np.real(self.network_data)
+        elif self.format == "RI":  
+            temp = 20*np.log10(np.abs(self.network_data))
+        elif self.format == "MA":  
+            temp=20*np.log10(np.real(self.network_data))
+            
+        elif self.format == "ABCD":
+            temp=20*np.log10(np.abs(self.complex))
         return temp
     
     def calc_linmag(self):
