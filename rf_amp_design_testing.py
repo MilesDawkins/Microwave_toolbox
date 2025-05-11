@@ -47,9 +47,9 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(amp_total.frequencies,amp_total.dbmag[0][0])
-plot.plot(amp_total.frequencies,amp_total.dbmag[1][0])
-plot.plot(bjt.frequencies,bjt.dbmag[1][0])
+plot.plot(amp_total.frequencies,amp_total.dbmag[0,0])
+plot.plot(amp_total.frequencies,amp_total.dbmag[1,0])
+plot.plot(bjt.frequencies,bjt.dbmag[1,0])
 
 """
 smith = mt.plotting_tools.smith_chart()

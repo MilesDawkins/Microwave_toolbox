@@ -28,49 +28,34 @@ class network():
                 self.num_ports = num_ports
                 if num_ports != 1:
                     for i in range(self.num_ports):
-                        self.file_data.append([[None,None]])
+                        self.file_data.append([[None]])
                         for j in range(self.num_ports-1):
-                            self.file_data[i].append([None,None])
+                            self.file_data[i].append([None])
                 else:
                     self.file_data = None
-                    self.file_data = [[None,None]]                  
+                    self.file_data = [[None]]                  
             else:
                 self.num_ports = 0
 
 
             if frequencies is not None:
-                self.frequencies = frequencies
+                self.frequencies = np.array(frequencies)
                 if num_ports != 1:
                     for i in range(self.num_ports):
                         for j in range(self.num_ports): 
-                            for f in range(len(frequencies)):
-                                if f == 0:
-                                    if s_user is not None:
-                                        self.file_data[i][j]=s_user[i][j][0]
-                                    else:
-                                       
-                                        self.file_data[i][j]=[[None,None]]
-                                        
+                            for f in range(len(frequencies)-1):
+                                if s_user is not None:
+                                    self.file_data[i][j].append(s_user[i][j][f])
                                 else:
-                                    if s_user is not None:
-                                        self.file_data[i][j].append(s_user[i][j][f])
-                                    else:
-                                        self.file_data[i][j].append([None,None])
+                                    self.file_data[i][j].append(None)
 
                 else:
-                    for f in range(len(frequencies)):
-                        if f == 0:
-                            if s_user is not None:
-                                self.file_data[0]=[s_user[f]]
-                            else:
-                                self.file_data[0]=[None,None]
+                    for f in range(len(frequencies)-1):
+                        if s_user is not None:
+                            self.file_data.append(s_user[f])
                         else:
-                            if s_user is not None:
-                                self.file_data.append(s_user[f])
-                            else:
-                                self.file_data.append([None,None])
+                            self.file_data.append(None)
                             
-            
             if file_path is not None:
                 file_path = file_path.replace("\\", "/")
                 self.file_path = file_path
@@ -182,7 +167,7 @@ class network():
 
     def calc_dbmag(self):
 
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
 
         if self.num_ports != 1:
             if self.format == "DB":  
@@ -198,7 +183,7 @@ class network():
     
     def calc_linmag(self):
 
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
 
         if self.format == "DB":  
             temp=10**(np.real(self.network_data)/20)
@@ -213,7 +198,7 @@ class network():
     
     def calc_phase(self):
  
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
 
         if self.format == "DB":  
             temp = np.real(self.network_data)
@@ -227,7 +212,7 @@ class network():
         return temp
     
     def calc_complex(self):
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
         
         if self.format != "ABCD":
             if self.format == "DB":  
@@ -242,7 +227,7 @@ class network():
         return temp
     
     def calc_input_impedance(self):
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
 
         temp = self.z_reference*((1+self.complex)/(1-self.complex)) 
 
@@ -250,7 +235,7 @@ class network():
     
     def calc_abcd(self):
         #currently relies on complex data being available
-        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
         if self.num_ports != 1:
 
             if self.format != "ABCD":
@@ -258,8 +243,8 @@ class network():
                 temp[0,1]=(self.z_reference*((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
                 temp[1,0]=((1/self.z_reference)*((1-self.complex[0,0])*(1-self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
                 temp[1,1]=(((1-self.complex[0,0])*(1+self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+
             else:
-                
                 temp[0,0]=self.network_data[0,0]
                 temp[0,1]=self.network_data[0,1]
                 temp[1,0]=self.network_data[1,0]
@@ -272,7 +257,7 @@ class network():
     
     def abcd_to_complex_s(self): 
 
-        temp = np.empty((2,2,len(self.frequencies)))
+        temp = np.empty((2,2,len(self.frequencies)),dtype = "complex")
        
         a = self.abcd[0,0]
         b = self.abcd[0,1]
@@ -321,56 +306,54 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
         s_c = network(num_ports=2,frequencies=freq)
                                
     #interpolate frequency points and convert both sparametrs to ABCD parameters
-    for f in range(len(s_c.frequencies)):
-        s_c.format = "RI"
+    s_c.format = "RI"
 
+    #interpolate value at frequency point
+    s11_1 = np.interp(s_c.frequencies,s1.frequencies,s1.complex[0,0])
+    s12_1 = np.interp(s_c.frequencies,s1.frequencies,s1.complex[0,1])
+    s21_1 = np.interp(s_c.frequencies,s1.frequencies,s1.complex[1,0])
+    s22_1 = np.interp(s_c.frequencies,s1.frequencies,s1.complex[1,1])
+        
+    if s2.num_ports == 1:
+        
+        s11_2 = np.interp(s_c.frequencies,s2.frequencies,s2.complex)
+        temp = s11_1 + ((s21_1*s12_1*s11_2)/(1-s22_1*s11_2))
+        s_c.file_data=temp
+        
+    if s2.num_ports == 2:
+        
         #interpolate value at frequency point
-        s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0,0])
-        s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0,1])
-        s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1,0])
-        s22_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1,1])
-           
-        if s2.num_ports == 1:
-            
-            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex)
-            temp = s11_1 + ((s21_1*s12_1*s11_2)/(1-s22_1*s11_2))
-            s_c.file_data[f]=[np.real(temp), np.imag(temp)]
-            
-        if s2.num_ports == 2:
-            
-            #interpolate value at frequency point
-            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0,0])
-            s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0,1])
-            s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1,0])
-            s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1,1])
-            
-            #convert to ABCD parametersS
-            a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
-            b1=(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
-            c1=((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
-            d1=(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
+        s11_2 = np.interp(s_c.frequencies,s2.frequencies,s2.complex[0,0])
+        s12_2 = np.interp(s_c.frequencies,s2.frequencies,s2.complex[0,1])
+        s21_2 = np.interp(s_c.frequencies,s2.frequencies,s2.complex[1,0])
+        s22_2 = np.interp(s_c.frequencies,s2.frequencies,s2.complex[1,1])
+        
+        #convert to ABCD parametersS
+        a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
+        b1=(s1.z_reference*((1+s11_1)*(1+s22_1)-(s12_1*s21_1))/(2*s21_1))
+        c1=((1/s1.z_reference)*((1-s11_1)*(1-s22_1)-(s12_1*s21_1))/(2*s21_1))
+        d1=(((1-s11_1)*(1+s22_1)+(s12_1*s21_1))/(2*s21_1))
 
-            a2=(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
-            b2=(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
-            c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
-            d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
-            
-            #cascade network parameters using matrix multiplication
-            a_c=(a1*a2+b1*c2)
-            b_c=(a1*b2+b1*d2)
-            c_c=(c1*a2+d1*c2)
-            d_c=(c1*b2+d1*d2)
+        a2=(((1+s11_2)*(1-s22_2)+(s12_2*s21_2))/(2*s21_2))
+        b2=(s2.z_reference*((1+s11_2)*(1+s22_2)-(s12_2*s21_2))/(2*s21_2))
+        c2=((1/s2.z_reference)*((1-s11_2)*(1-s22_2)-(s12_2*s21_2))/(2*s21_2))
+        d2=(((1-s11_2)*(1+s22_2)+(s12_2*s21_2))/(2*s21_2))
+        
+        #cascade network parameters using matrix multiplication
+        a_c=(a1*a2+b1*c2)
+        b_c=(a1*b2+b1*d2)
+        c_c=(c1*a2+d1*c2)
+        d_c=(c1*b2+d1*d2)
 
-            #convert cascaded network ABCD aprameters back to s parameters
-            temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
-            s_c.file_data[0][0][f]=[np.real(temp) + 1J*np.imag(temp)]
-            temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[0][1][f]=[np.real(temp) + 1J*np.imag(temp)]
-            temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[1][0][f]=[np.real(temp) + 1J*np.imag(temp)]
-            temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[1][1][f]=[np.real(temp) + 1j*np.imag(temp)]
-
+        #convert cascaded network ABCD aprameters back to s parameters
+        temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
+        s_c.file_data[0][0]=temp
+        temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[0][1]=temp
+        temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[1][0]=temp
+        temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
+        s_c.file_data[1][1]=temp
 
     return s_c
 

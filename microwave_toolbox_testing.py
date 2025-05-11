@@ -13,8 +13,7 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 #################calulation functions###########################
 freqs = np.linspace(10E9, 10.01E9,1000)
 bjt = mt.system_tools.network(file)
-bjt2 = (bjt ** bjt)
-bjt2 = bjt2 ** bjt
-print(bjt.network_data)
+bjt2 = bjt ** bjt
+
 plot.plot(bjt2.frequencies,bjt2.dbmag[1,0])
 plot.show()

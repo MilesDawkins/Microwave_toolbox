@@ -82,47 +82,46 @@ class microstrip():
         else:
             self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
         
-        for f in range(len(freqs)):
-            lambda_freq = self.vp_line/freqs[f]
-            beta_freq = (2*np.pi)/lambda_freq
+        
+        lambda_freq = self.vp_line/freqs
+        beta_freq = (2*np.pi)/lambda_freq
 
-            if self.typem == "t_line":
+        if self.typem == "t_line":
 
-                #A
-                a = np.cos(beta_freq * length)
-                self.network.file_data[0][0][f]=[np.real(a),np.imag(a)]
-                #B
-                b = 1j*self.zo*np.sin(beta_freq * length)
-                self.network.file_data[0][1][f]=[np.real(b),np.imag(b)]
-                #C
-                c = 1j*(1/self.zo)*np.sin(beta_freq * length)
-                self.network.file_data[1][0][f]=[np.real(c),np.imag(c)]
-                #D
-                d = np.cos(beta_freq * length)
-                self.network.file_data[1][1][f]=[np.real(d),np.imag(d)]
+            #A
+            a = np.cos(beta_freq * length)
+            self.network.file_data[0][0]=a
+            #B
+            b = 1j*self.zo*np.sin(beta_freq * length)
+            self.network.file_data[0][1]=b
+            #C
+            c = 1j*(1/self.zo)*np.sin(beta_freq * length)
+            self.network.file_data[1][0]=c
+            #D
+            d = np.cos(beta_freq * length)
+            self.network.file_data[1][1]=d
 
-            elif shunt:
-                #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
-                adm = (1/(self.input_z(freqs[f],self.length,self.zl)))
-
-                #A
-                self.network.file_data[0][0][f]=[1,0]
-                #B
-                self.network.file_data[0][1][f]=[0, 0]
-                #C
-                self.network.file_data[1][0][f]=[np.real(adm),np.imag(adm)]
-                #D
-                self.network.file_data[1][1][f]=[1, 0]
-                
-                
-            else: 
-                if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
-                    gamma_in = (self.input_z(freqs[f],self.length,self.zl)-50)/(self.input_z(freqs[f],self.length,self.zl)+50)
-                else:
-                    gamma_in = (self.input_z(freqs[f],self.length,self.zl[f])-50)/(self.input_z(freqs[f],self.length,self.zl[f])+50)
-                #s11
-                self.network.file_data[f][0]=np.abs(gamma_in)
-                self.network.file_data[f][1]=(180/np.pi)*cm.phase(gamma_in)
+        elif shunt:
+            #reference for this eq: https://my.eng.utah.edu/~cfurse/ece5320/lecture/L9b/A%20Review%20of%20ABCD%20Parameters.pdf
+            adm = (1/(self.input_z(freqs,self.length,self.zl)))
+            
+            #A
+            self.network.file_data[0][0]=np.ones(len(adm))
+            #B
+            self.network.file_data[0][1]=np.zeros(len(adm))
+            #C
+            self.network.file_data[1][0]=adm
+            #D
+            self.network.file_data[1][1]=np.ones(len(adm))
+            
+            
+        else: 
+            if isinstance(self.zl,float) or isinstance(self.zl,int) or np.iscomplex(self.zl) == 1:
+                gamma_in = (self.input_z(freqs,self.length,self.zl)-50)/(self.input_z(freqs,self.length,self.zl)+50)
+            else:
+                gamma_in = (self.input_z(freqs,self.length,self.zl)-50)/(self.input_z(freqs,self.length,self.zl)+50)
+            #s11
+            self.network.file_data=np.abs(gamma_in) + 1j*((180/np.pi)*cm.phase(gamma_in))
                
 
     def wavelength(self,frequency):
