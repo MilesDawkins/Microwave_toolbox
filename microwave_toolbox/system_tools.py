@@ -78,6 +78,8 @@ class network():
 
     #dynamically calculate specified attribute, lowers memory allocation of a single network class
     def __getattr__(self, attr):
+        if attr=="network_data":
+            self.network_data = np.array(self.file_data)
         if attr=="dbmag":
             self.dbmag = self.calc_dbmag()
         if attr=="linmag":
@@ -161,11 +163,9 @@ class network():
                         for i in range(self.num_ports):
                             for j in range(self.num_ports): 
                                 self.file_data[i][j].append(file_line[i*self.num_ports*2 + 2*j+1]+1J*file_line[i*self.num_ports*2 + 2*j+2])
-                        else:
-                             raise ValueError("Data Format Unsupported")
                     else:
-                        raise ValueError("No or unknown number of ports")
-                    
+                        raise ValueError("Data Format Unsupported")
+
                     if self.freq_unit == "GHZ":
                         self.frequencies.append(1E9*freq)
                     elif self.freq_unit == "MHZ":
@@ -174,184 +174,114 @@ class network():
                         self.frequencies.append(1E3*freq)
                     elif self.freq_unit == "HZ":
                         self.frequencies.append(freq)
+
+        #convert to np.array
         self.network_data = np.array(self.file_data)
+
         return
 
     def calc_dbmag(self):
 
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
 
-            for i in range(self.num_ports):
-                for j in range(self.num_ports): 
-                    if self.format == "DB":  
-                        temp[i][j] = ([x[0] for x in self.file_data[i][j]])
-                    elif self.format == "RI":  
-                        temp[i][j] = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data[i][j]])
-                    elif self.format == "MA":  
-                        temp[i][j] = ([20*np.log10(x[0]) for x in self.file_data[i][j]])
-                    elif self.format == "ABCD":
-                        temp[i][j] =  ([20*np.log10(np.sqrt(np.real(x)**2 + np.imag(x)**2)) for x in self.complex[i][j]])
-        else:
-            temp = []
+        if self.num_ports != 1:
             if self.format == "DB":  
-                temp = ([x[0] for x in self.file_data])
+                temp = np.real(self.network_data)
             elif self.format == "RI":  
-                temp = ([20*np.log10(np.sqrt(x[0]**2 + x[1]**2)) for x in self.file_data])
+                temp = 20*np.log10(np.abs(self.network_data))
             elif self.format == "MA":  
-                temp = ([20*np.log10(x[0]) for x in self.file_data])
+                temp=20*np.log10(np.real(self.network_data))
+            elif self.format == "ABCD":
+                temp=20*np.log10(np.abs(self.complex))
         return temp
     
     def calc_linmag(self):
 
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
 
-            for i in range(self.num_ports):
-                for j in range(self.num_ports):
-                    if self.format == "DB":  
-                        temp[i][j] = ([10**(x[0]/20) for x in self.file_data[i][j]])
-                    elif self.format == "RI":  
-                        temp[i][j] = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data[i][j]])
-                    elif self.format == "MA":  
-                        temp[i][j] = [x[0] for x in self.file_data[i][j]] 
-                    elif self.format == "ABCD":
-                        temp[i][j] =  ([np.sqrt(np.real(x)**2 + np.imag(x)**2) for x in self.complex[i][j]])
-        else:
-            temp = [None]
-            if self.format == "DB":  
-                temp = ([10**(x[0]/20) for x in self.file_data])
-            elif self.format == "RI":  
-                temp = ([np.sqrt(x[0]**2 + x[1]**2) for x in self.file_data])
-            elif self.format == "MA":  
-                temp = [x[0] for x in self.file_data[i][j]] 
+        if self.format == "DB":  
+            temp=10**(np.real(self.network_data)/20)
+        elif self.format == "RI":  
+            temp = np.abs(self.network_data)
+        elif self.format == "MA":  
+            temp = np.real(self.network_data)
+        elif self.format == "ABCD":
+            temp = np.abs(self.complex)
+
         return temp
     
     def calc_phase(self):
  
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
-                    
-            for i in range(self.num_ports):
-                for j in range(self.num_ports): 
-                    if self.format == "DB":  
-                        temp[i][j] = ([x[1] for x in self.file_data[i][j]])
-                    elif self.format == "RI":  
-                        temp[i][j] = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data[i][j]]
-                    elif self.format == "MA":  
-                        temp[i][j] = ([x[1] for x in self.file_data[i][j]])
-                    elif self.format == "ABCD":
-                        temp[i][j] = ([(180/np.pi)*np.arctan(np.imag(x)/np.real(x)) if np.real(x)!=0 else 180 for x in self.complex[i][j]])
-        else:
-            temp = [None]
-            if self.format == "DB":  
-                temp = ([x[1] for x in self.file_data])
-            elif self.format == "RI":  
-                temp = [(180/np.pi)*np.arctan(x[1]/x[0]) if x[0]!=0 else 180 for x in self.file_data]
-            elif self.format == "MA":  
-                temp = ([x[1] for x in self.file_data])
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
+
+        if self.format == "DB":  
+            temp = np.real(self.network_data)
+        elif self.format == "RI":  
+            temp=np.angle(self.file_data)
+        elif self.format == "MA":   
+            temp = np.imag(self.network_data)
+        elif self.format == "ABCD":
+            temp = np.angle(self.complex)
+
         return temp
     
     def calc_complex(self):
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
-
-            if self.format != "ABCD":
-                for i in range(self.num_ports):
-                    for j in range(self.num_ports): 
-                        if self.format == "DB":  
-                            temp[i][j] = [((10**(float(x[0])/20))*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**(float(x[0])/20))*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data[i][j]]
-                        elif self.format == "RI":  
-                            temp[i][j] = [x[0] + 1j*x[1] for x in self.file_data[i][j]]
-                        elif self.format == "MA": 
-                            temp[i][j] = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data[i][j]])
-            else:
-                temp = self.abcd_to_complex_s()
-                
-
-        else:
-            temp = [None]
-            if self.format == "DB":  
-                temp = [((10**float(x[0])/20)*np.cos(float(x[1]) * (np.pi/180))) + 1j*((10**float(x[0])/20)*np.sin(float(x[1]) * (np.pi/180))) for x in self.file_data]
-            elif self.format == "RI":  
-                temp = [x[0] + 1j*x[1] for x in self.file_data]
-            elif self.format == "MA": 
-                temp = ([((float(x[0])*np.cos(float(x[1]) * (np.pi/180))) + 1j*(float(x[0])*np.sin(float(x[1]) * (np.pi/180)))) for x in self.file_data])
-
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
         
+        if self.format != "ABCD":
+            if self.format == "DB":  
+                temp = (10**(np.real(self.network_data)/20))*np.cos(np.imag(self.network_data) * (np.pi/180)) + 1j*((10**(np.real(self.network_data)/20))*np.sin(np.imag(self.network_data) * (np.pi/180)))
+            elif self.format == "RI":  
+                temp = self.network_data
+            elif self.format == "MA": 
+                temp = ((np.real(self.network_data)*np.cos(np.imag(self.network_data) * (np.pi/180))) + 1j*(np.real(self.network_data)*np.sin(np.imag(self.network_data) * (np.pi/180)))) 
+        else:
+            temp = self.abcd_to_complex_s()
+
         return temp
     
     def calc_input_impedance(self):
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
 
-            for i in range(self.num_ports):
-                temp[i][i] = [self.z_reference*((1+x)/(1-x)) for x in self.complex[i][i]]
-               
-        else:
-            temp = [None]
-            temp = [self.z_reference*((1+x)/(1-x)) for x in self.complex]
-        
+        temp = self.z_reference*((1+self.complex)/(1-self.complex)) 
+
         return temp
     
     def calc_abcd(self):
         #currently relies on complex data being available
-        temp = [[[]]]
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)))
         if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
 
             if self.format != "ABCD":
-                for f in range(len(self.frequencies)):
-                    temp[0][0][f]=(((1+self.complex[0][0][f])*(1-self.complex[1][1][f])+(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
-                    temp[0][1][f]=(self.z_reference*((1+self.complex[0][0][f])*(1+self.complex[1][1][f])-(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
-                    temp[1][0][f]=((1/self.z_reference)*((1-self.complex[0][0][f])*(1-self.complex[1][1][f])-(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
-                    temp[1][1][f]=(((1-self.complex[0][0][f])*(1+self.complex[1][1][f])+(self.complex[0][1][f]*self.complex[1][0][f]))/(2*self.complex[1][0][f]))
+                temp[0][0]=(((1+self.complex[0][0])*(1-self.complex[1][1])+(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
+                temp[0][1]=(self.z_reference*((1+self.complex[0][0])*(1+self.complex[1][1])-(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
+                temp[1][0]=((1/self.z_reference)*((1-self.complex[0][0])*(1-self.complex[1][1])-(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
+                temp[1][1]=(((1-self.complex[0][0])*(1+self.complex[1][1])+(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
             else:
                 
                 temp[0][0]=[x[0] + 1j*x[1] for x in self.file_data[0][0]]
                 temp[0][1]=[x[0] + 1j*x[1] for x in self.file_data[0][1]]
                 temp[1][0]=[x[0] + 1j*x[1] for x in self.file_data[1][0]]
                 temp[1][1]=[x[0] + 1j*x[1] for x in self.file_data[1][1]]
+
         else:
             SyntaxError("Cannot compute ABCD for 1 port networks, consider changing to shunt element")
         
         return temp
     
     def abcd_to_complex_s(self): 
-        temp = [[[]]]
-        if self.num_ports != 1:
-            for i in range(self.num_ports):
-                temp.append([[]])
-                for j in range(self.num_ports):
-                    temp[i].append([])
+
+        temp = np.empty((2,2,len(self.frequencies)))
        
-        temp[0][0] = [((a+(b/self.z_reference)-(c*self.z_reference)-d)/((a+b/self.z_reference)+(c*self.z_reference)+d)) for a,b,c,d in zip(self.abcd[0][0],self.abcd[0][1],self.abcd[1][0],self.abcd[1][1])]
-        temp[0][1] = [((2*(a*d-b*c))/((a+b/self.z_reference)+(c*self.z_reference)+d)) for a,b,c,d in zip(self.abcd[0][0],self.abcd[0][1],self.abcd[1][0],self.abcd[1][1])]
-        temp[1][0] = [((2)/((a+b/self.z_reference)+(c*self.z_reference)+d)) for a,b,c,d in zip(self.abcd[0][0],self.abcd[0][1],self.abcd[1][0],self.abcd[1][1])]
-        temp[1][1] = [((-1*a+(b/self.z_reference)-c*self.z_reference+d)/((a+b/self.z_reference)+(c*self.z_reference)+d)) for a,b,c,d in zip(self.abcd[0][0],self.abcd[0][1],self.abcd[1][0],self.abcd[1][1])]
+        a = self.abcd[0,0]
+        b = self.abcd[0,1]
+        c = self.abcd[1,0]
+        d = self.abcd[1,1]
+
+        temp[0][0] = ((a+(b/self.z_reference)-(c*self.z_reference)-d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[0][1] = ((2*(a*d-b*c))/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[1][0] = ((2)/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[1][1] = ((-1*a+(b/self.z_reference)-c*self.z_reference+d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
             
         return temp
     
@@ -394,10 +324,10 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
         s_c.format = "RI"
 
         #interpolate value at frequency point
-        s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][0])
-        s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0][1])
-        s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][0])
-        s22_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1][1])
+        s11_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0,0])
+        s12_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[0,1])
+        s21_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1,0])
+        s22_1 = np.interp(s_c.frequencies[f],s1.frequencies,s1.complex[1,1])
            
         if s2.num_ports == 1:
             
@@ -408,10 +338,10 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
         if s2.num_ports == 2:
             
             #interpolate value at frequency point
-            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][0])
-            s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0][1])
-            s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][0])
-            s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1][1])
+            s11_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0,0])
+            s12_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[0,1])
+            s21_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1,0])
+            s22_2 = np.interp(s_c.frequencies[f],s2.frequencies,s2.complex[1,1])
             
             #convert to ABCD parametersS
             a1=(((1+s11_1)*(1-s22_1)+(s12_1*s21_1))/(2*s21_1))
