@@ -8,16 +8,15 @@ import time
 ##############setup functions####################
 start_time = time.time()
 script_directory = os.path.dirname(os.path.abspath(__file__))
-file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
+file1 = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
+file2 = os.path.join(script_directory,"BFCN-1560+___Plus25degC.s2p")
 
 #################calulation functions###########################
-freqs = np.linspace(1E9, 10.01E9,1000)
-bjt = mt.system_tools.network(file)
-bjt2 = bjt ** bjt
+freqs = np.linspace(1E6, 1E9,10000)
+bjt = mt.system_tools.network(file1)
+filter = mt.system_tools.network(file2)
+tl = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.01,freqs_in = freqs)
+bjt2 = bjt ** tl.network ** filter
 
-zl = 10+1j/(2*np.pi*freqs*1E-12)
-
-tl = mt.t_line_tools.microstrip(100,4.4,1.6E-3,0.01,freqs_in = freqs,zl_in=zl)
-
-plot.plot(tl.network.frequencies,tl.network.dbmag)
+plot.plot(bjt2.frequencies,bjt2.dbmag[0,0])
 plot.show()

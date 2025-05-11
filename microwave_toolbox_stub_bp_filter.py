@@ -30,7 +30,7 @@ shunt_match2 = mt.t_line_tools.microstrip(z2,4.4,1.6E-3,sl,freqs_in = freqs, typ
 phase_match1 = mt.t_line_tools.microstrip(z12,4.4,1.6E-3,pl,freqs_in = freqs, length_unit="lambda", center_freq= f0)
 phase_match2 = mt.t_line_tools.microstrip(z12,4.4,1.6E-3,pl,freqs_in = freqs, length_unit="lambda", center_freq= f0)
 
-tl = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.01,freqs_in = freqs,zl_in=25)
+tl = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.01,freqs_in = freqs,zl_in=50)
 
 network = shunt_match1.network ** phase_match1.network ** shunt_match2.network ** phase_match2.network ** shunt_match2.network ** phase_match1.network ** shunt_match1.network ** tl.network
 
