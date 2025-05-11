@@ -35,8 +35,8 @@ network = shunt_match1.network ** phase_match1.network ** shunt_match2.network *
 print("--- %s seconds ---" % (time.time() - start_time))
 
 ##################plotting functions#######################
-plot.plot(network.frequencies,network.dbmag[1][0])
-plot.plot(network.frequencies,network.dbmag[0][0])
+plot.plot(network.frequencies,network.dbmag[1,0])
+plot.plot(network.frequencies,network.dbmag[0,0])
 plot.ylim([-50,0])
 plot.grid()
 plot.show()

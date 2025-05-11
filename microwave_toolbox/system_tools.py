@@ -191,6 +191,7 @@ class network():
                 temp = 20*np.log10(np.abs(self.network_data))
             elif self.format == "MA":  
                 temp=20*np.log10(np.real(self.network_data))
+                
             elif self.format == "ABCD":
                 temp=20*np.log10(np.abs(self.complex))
         return temp
@@ -253,16 +254,16 @@ class network():
         if self.num_ports != 1:
 
             if self.format != "ABCD":
-                temp[0][0]=(((1+self.complex[0][0])*(1-self.complex[1][1])+(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
-                temp[0][1]=(self.z_reference*((1+self.complex[0][0])*(1+self.complex[1][1])-(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
-                temp[1][0]=((1/self.z_reference)*((1-self.complex[0][0])*(1-self.complex[1][1])-(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
-                temp[1][1]=(((1-self.complex[0][0])*(1+self.complex[1][1])+(self.complex[0][1]*self.complex[1][0]))/(2*self.complex[1][0]))
+                temp[0,0]=(((1+self.complex[0,0])*(1-self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+                temp[0,1]=(self.z_reference*((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+                temp[1,0]=((1/self.z_reference)*((1-self.complex[0,0])*(1-self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+                temp[1,1]=(((1-self.complex[0,0])*(1+self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
             else:
                 
-                temp[0][0]=[x[0] + 1j*x[1] for x in self.file_data[0][0]]
-                temp[0][1]=[x[0] + 1j*x[1] for x in self.file_data[0][1]]
-                temp[1][0]=[x[0] + 1j*x[1] for x in self.file_data[1][0]]
-                temp[1][1]=[x[0] + 1j*x[1] for x in self.file_data[1][1]]
+                temp[0,0]=self.network_data[0,0]
+                temp[0,1]=self.network_data[0,1]
+                temp[1,0]=self.network_data[1,0]
+                temp[1,1]=self.network_data[1,1]
 
         else:
             SyntaxError("Cannot compute ABCD for 1 port networks, consider changing to shunt element")
@@ -278,10 +279,10 @@ class network():
         c = self.abcd[1,0]
         d = self.abcd[1,1]
 
-        temp[0][0] = ((a+(b/self.z_reference)-(c*self.z_reference)-d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
-        temp[0][1] = ((2*(a*d-b*c))/((a+b/self.z_reference)+(c*self.z_reference)+d))
-        temp[1][0] = ((2)/((a+b/self.z_reference)+(c*self.z_reference)+d))
-        temp[1][1] = ((-1*a+(b/self.z_reference)-c*self.z_reference+d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[0,0] = ((a+(b/self.z_reference)-(c*self.z_reference)-d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[0,1] = ((2*(a*d-b*c))/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[1,0] = ((2)/((a+b/self.z_reference)+(c*self.z_reference)+d))
+        temp[1,1] = ((-1*a+(b/self.z_reference)-c*self.z_reference+d)/((a+b/self.z_reference)+(c*self.z_reference)+d))
             
         return temp
     
@@ -362,15 +363,14 @@ def network_cascade(s1: network,s2: network, interp_freq_step = None):
 
             #convert cascaded network ABCD aprameters back to s parameters
             temp = (((a_c+(b_c/s1.z_reference)-(c_c*s1.z_reference)-d_c)/(a_c+(b_c/s1.z_reference)+(c_c*s1.z_reference)+d_c)))
-            s_c.file_data[0][0][f]=[np.real(temp), np.imag(temp)]
+            s_c.file_data[0][0][f]=[np.real(temp) + 1J*np.imag(temp)]
             temp = (((2*(a_c*d_c-b_c*c_c))/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[0][1][f]=[np.real(temp), np.imag(temp)]
+            s_c.file_data[0][1][f]=[np.real(temp) + 1J*np.imag(temp)]
             temp = ((2/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[1][0][f]=[np.real(temp), np.imag(temp)]
+            s_c.file_data[1][0][f]=[np.real(temp) + 1J*np.imag(temp)]
             temp = (((-a_c+b_c/s1.z_reference-c_c*s1.z_reference+d_c)/(a_c+b_c/s1.z_reference+c_c*s1.z_reference+d_c)))
-            s_c.file_data[1][1][f]=[np.real(temp), np.imag(temp)]
+            s_c.file_data[1][1][f]=[np.real(temp) + 1j*np.imag(temp)]
 
-    #convert result to all other network forms
 
     return s_c
 
