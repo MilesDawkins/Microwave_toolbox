@@ -43,7 +43,7 @@ shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.133*lamb,freqs_in = freq
 source_match = mt.system_tools.network_cascade(shunt_source.network,phase_source.network)
 load_match = mt.system_tools.network_cascade(phase_load.network,shunt_load.network)
 
-amp_total =  shunt_source.network ** phase_source.network **  bjt ** phase_load.network ** shunt_load.network ** phase_source.network ** shunt_source.network ** phase_source.network **  bjt ** phase_load.network ** shunt_load.network
+amp_total =  shunt_source.network ** phase_source.network **  bjt ** phase_load.network ** shunt_load.network
 
 print("--- %s seconds ---" % (time.time() - start_time))
 

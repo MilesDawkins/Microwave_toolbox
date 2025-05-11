@@ -129,9 +129,9 @@ class microstrip():
     def input_z(self,frequency,length,zl):
         lambda_line = self.vp_line/frequency
         
-        if((type(zl) == int) and (zl == 0)):
+        if(((type(zl) == int) or (type(zl) == float))  and (zl == 0)):
             self.z_in = 1j*self.zo*np.tan(((2*np.pi)/lambda_line)*length)
-        elif((type(zl) == int) and (zl == np.inf)):
+        elif(((type(zl) == int) or (type(zl) == float))  and (zl == np.inf)):
             self.z_in = -1*1j*self.zo*1/(np.tan(((2*np.pi)/lambda_line)*length))
             
         else:

@@ -40,7 +40,7 @@ def find_closest_indices(list_of_numbers, target_value):
     return closest_indices
 
 #setup functions##############################################################################################################
-step_size = 1000
+step_size = 600
 f0 = 5E9
 num_ele = 10
 plot_thresh = -40
