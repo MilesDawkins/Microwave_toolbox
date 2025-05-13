@@ -44,9 +44,10 @@ step_size = 600
 f0 = 1E9
 num_ele = 10
 plot_thresh = -40
-x_spacing = (3E8/f0)/4
+x_spacing = 0.316#(3E8/f0)/1.1
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
+phases = np.zeros(num_ele)
 #weights = [0.39547,0.506,0.7217,0.8995,1,1,0.8995,0.7217, 0.506,0.39547]
 #weights = [-1,-1,-1,-1,-1,1,1,1,1,1]
 
@@ -62,9 +63,10 @@ phases = np.zeros(num_ele)
 for ele in range(num_ele):
      ele_pos[ele][0] = start_x+ele*x_spacing
      x = ele_pos[ele][0]
+     #phases[ele] = np.pi*ele
 
 #calcualte array factor
-array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights)
+array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights,phases = phases)
 array.calc_array_factor(f0,step_size)
 
 #calcualte gain based on antenna pattern and array factor
@@ -90,7 +92,7 @@ for p in range(len(phi)):
 
     inte = inte + inte1 * ((2*np.pi)/step_size)
 
-do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514
+do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514053150483
 
 print(do)
 #[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
