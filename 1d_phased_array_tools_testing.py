@@ -78,6 +78,7 @@ au_lin = 10**(au/10)
 E_cut = [au[x][int(step_size/4)] for x in range(len(au))]
 max_gain = np.nanmax(E_cut)
 
+#numerical directiviy integration and calcualtion
 inte = 0
 inte1 = 0
 phi = np.linspace(0,2*np.pi,step_size)
@@ -88,7 +89,7 @@ for p in range(len(phi)):
         inte1 = inte1 + (np.pi/step_size/2) * au_lin[p,t] * np.sin(theta[t])
 
     inte = inte + inte1 * ((2*np.pi)/step_size)
-    
+
 do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514
 
 print(do)
