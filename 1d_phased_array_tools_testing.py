@@ -44,7 +44,7 @@ step_size = 600
 f0 = 1E9
 num_ele = 10
 plot_thresh = -40
-x_spacing = 0.316#(3E8/f0)/1.1
+x_spacing = (3E8/f0)/3
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
 phases = np.zeros(num_ele)
@@ -54,7 +54,7 @@ phases = np.zeros(num_ele)
 #calculation functions##############################################################################################################
 
 #calcualte dipole pattern
-dpp = mt.antenna_tools.create_isotropic(f0,step_size)
+dpp = mt.antenna_tools.create_dipole(f0,step_size)
 
 #setup array based on inputs
 ele_pos = np.zeros((num_ele,3))

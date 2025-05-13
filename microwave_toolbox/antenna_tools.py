@@ -34,8 +34,7 @@ def create_dipole(f0,steps):
     eta = 120*np.pi
     beta = (2*np.pi)/(3E8/f0)
     ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
-    ant.rad_intensity = 1.64 * (((np.cos(beta*l/2*np.cos(theta)))-np.cos(beta*l/2))/np.sin(theta))**2
-    print(len(ant.rad_intensity))
+    ant.rad_intensity = np.nan_to_num(1.64 * (((np.cos(beta*l/2*np.cos(theta)))-np.cos(beta*l/2))/np.sin(theta))**2, nan=0.0, posinf=0.0, neginf=0.0)
     return ant
 
 def create_isotropic(f0,steps):
@@ -43,8 +42,7 @@ def create_isotropic(f0,steps):
     ant.phi = np.linspace(0,2*np.pi,steps)
     ant.theta =  np.linspace(0,np.pi,int(steps/2))
     theta,phi = np.meshgrid(ant.theta,ant.phi)
-    ant.rad_intensity=np.ones([len(ant.phi),len(ant.theta)])
-    print(len(ant.rad_intensity))
+    ant.rad_intensity = np.nan_to_num(np.ones([len(ant.phi),len(ant.theta)]), nan=0.0, posinf=0.0, neginf=0.0)
     return ant
 
 def create_cos(f0,power,steps, norm_vec = None):
@@ -53,8 +51,7 @@ def create_cos(f0,power,steps, norm_vec = None):
     ant.theta =  np.linspace(0,np.pi,int(steps/2))
     theta,phi = np.meshgrid(ant.theta,ant.phi)
     ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
-    ant.rad_intensity = np.cos(theta)**power
-    print(len(ant.rad_intensity))
+    ant.rad_intensity = np.nan_to_num(np.cos(theta)**power, nan=0.0, posinf=0.0, neginf=0.0)
     return ant
 
 
