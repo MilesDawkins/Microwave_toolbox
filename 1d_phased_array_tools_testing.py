@@ -44,7 +44,7 @@ step_size = 600
 f0 = 1E9
 num_ele = 10
 plot_thresh = -40
-x_spacing = (3E8/f0)/3
+x_spacing = (3E8/f0)/1.5
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
 phases = np.zeros(num_ele)
@@ -54,7 +54,7 @@ phases = np.zeros(num_ele)
 #calculation functions##############################################################################################################
 
 #calcualte dipole pattern
-dpp = mt.antenna_tools.create_dipole(f0,step_size)
+dpp = mt.antenna_tools.create_isotropic(f0,step_size)
 
 #setup array based on inputs
 ele_pos = np.zeros((num_ele,3))
@@ -63,7 +63,7 @@ phases = np.zeros(num_ele)
 for ele in range(num_ele):
      ele_pos[ele][0] = start_x+ele*x_spacing
      x = ele_pos[ele][0]
-     #phases[ele] = np.pi*ele
+     #phases[ele] = np.pi/2*ele
 
 #calcualte array factor
 array = mt.phased_array_tools.element_array(dpp,ele_pos,step_size,weights = weights,phases = phases)
@@ -89,11 +89,8 @@ for p in range(len(phi)):
     inte1 = 0
     for t in range(len(theta)):
         inte1 = inte1 + (np.pi/step_size/2) * au_lin[p,t] * np.sin(theta[t])
-
     inte = inte + inte1 * ((2*np.pi)/step_size)
-
-do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514053150483
-
+do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514053150483 #not sure where the 6 is coming from but this gets me the same values as balanis
 print(do)
 #[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
 
