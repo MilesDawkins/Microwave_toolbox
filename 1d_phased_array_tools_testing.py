@@ -42,9 +42,9 @@ def find_closest_indices(list_of_numbers, target_value):
 #setup functions##############################################################################################################
 step_size = 600
 f0 = 1E9
-num_ele = 10
+num_ele = 1
 plot_thresh = -40
-x_spacing = (3E8/f0)/1.5
+x_spacing = 0.035#(3E8/f0)/4
 print("Element Spacing (M) = ",x_spacing)
 weights = np.ones(num_ele)
 phases = np.zeros(num_ele)
@@ -54,7 +54,7 @@ phases = np.zeros(num_ele)
 #calculation functions##############################################################################################################
 
 #calcualte dipole pattern
-dpp = mt.antenna_tools.create_isotropic(f0,step_size)
+dpp = mt.antenna_tools.create_dipole(f0,step_size)
 
 #setup array based on inputs
 ele_pos = np.zeros((num_ele,3))
@@ -90,7 +90,7 @@ for p in range(len(phi)):
     for t in range(len(theta)):
         inte1 = inte1 + (np.pi/step_size/2) * au_lin[p,t] * np.sin(theta[t])
     inte = inte + inte1 * ((2*np.pi)/step_size)
-do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514053150483 #not sure where the 6 is coming from but this gets me the same values as balanis
+do=10*np.log10(np.nanmax(au_lin)/(1/(4*np.pi)*(inte))) - 6.03514053150483# #not sure where the 6 is coming from but this gets me the same values as balanis, for cos elements divide 6 factor by 2 (why?), fordipole subtract 1.355 on top of 6 factor (only ofr arrays?)
 print(do)
 #[hp1,hp2]=find_closest_indices(E_cut,(max_gain-3))
 
