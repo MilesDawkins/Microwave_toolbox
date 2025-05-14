@@ -9,18 +9,51 @@ from . import system_tools as st
 #for cascade analysis in the future
 class antenna():
     def __init__(self, file_path = None, gain = None, frequencies = None):
-            
             # create class instance globals
-            self.type = "antenna"
             self.sub_type = "antenna"
-            self.frequencies = []
+            self.frequencies = np.array([])
             self.freq_max = 0
             self.freq_min = 0
-            self.file_data = [[[]*1]*1]*1
+            self.phi = np.array([])
+            self.theta = np.array([])
+            self.rad_intensity = np.array([1,1])
+            self.p_in = 1
+            self.coor_system = "Spherical"
             self.version = ""
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
+
+
+def create_dipole(f0,steps):
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
+    l = (3E8/f0)/2
+    eta = 120*np.pi
+    beta = (2*np.pi)/(3E8/f0)
+    ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
+    ant.rad_intensity = np.nan_to_num(1.64 * (((np.cos(beta*l/2*np.cos(theta)))-np.cos(beta*l/2))/np.sin(theta))**2, nan=0.0, posinf=0.0, neginf=0.0)
+    return ant
+
+def create_isotropic(f0,steps):
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
+    ant.rad_intensity = np.nan_to_num(np.ones([len(ant.phi),len(ant.theta)]), nan=0.0, posinf=0.0, neginf=0.0)
+    return ant
+
+def create_cos(f0,power,steps, norm_vec = None):
+    ant = antenna()
+    ant.phi = np.linspace(0,2*np.pi,steps)
+    ant.theta =  np.linspace(0,np.pi,int(steps/2))
+    theta,phi = np.meshgrid(ant.theta,ant.phi)
+    ant.rad_intensity.resize([len(ant.phi),len(ant.theta)])
+    ant.rad_intensity = np.nan_to_num(np.cos(theta)**power, nan=0.0, posinf=0.0, neginf=0.0)
+    return ant
+
 
 
 #class for defining antenna measurements in a chamber. arguments can be gain over frequency with az/el cuts
@@ -28,7 +61,6 @@ class ant_meas():
     def __init__(self, file_path = None, gain = None, frequencies = None):
             
             # create class instance globals
-            self.type = "antenna"
             self.sub_type = "measurement"
             self.frequencies = []
             self.freq_max = 0
@@ -38,8 +70,6 @@ class ant_meas():
             self.freq_unit = ""
             self.format = ""
             self.z_reference = 50
-
-
 
 
 # calculates a boresight gain measurement in an anechoic chamber using the 3 antenna method

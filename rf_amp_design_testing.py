@@ -12,9 +12,10 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 
 #################calulation functions###########################
 freqs = np.linspace(1E1,12E9,1000)
-gain_req = 6
+gain_req = 10
 
 bjt = mt.system_tools.network(file)
+
 amp_calc = mt.circuit_tools.rf_amplifier(bjt)
 
 trans_gain = 10*np.log10(np.interp(10E9,amp_calc.frequencies,amp_calc.max_transducer_gain))
@@ -23,29 +24,35 @@ sc,sr,lc,lr, min_gs, min_gl = amp_calc.calc_gain_circle(match_gain/2,10E9)
 totalgain = trans_gain + match_gain
 print(trans_gain)
 print(totalgain)
-print(min_gs)
-print(min_gl)
+print(mt.system_tools.gamma_2_impedance(50,min_gs)/50)
+print(mt.system_tools.gamma_2_impedance(50,min_gl)/50)
+
 
 microstrip_ref = mt.t_line_tools.microstrip(50,4.4,1.6E-3,1)
 lamb = microstrip_ref.wavelength(10E9)
-print(lamb)
 
-#6db amp sim
-phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.165*lamb,freqs_in = freqs)
-shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.11*lamb+0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
-phase_load =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.167*lamb,freqs_in = freqs)
-shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.162*lamb+0.25*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+
+
+
+phase_source =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.28*lamb,freqs_in = freqs)
+shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.106*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+
+phase_load =  mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.295*lamb,freqs_in = freqs)
+shunt_load = mt.t_line_tools.microstrip(50,4.4,1.6E-3,0.133*lamb,freqs_in = freqs, typem="open", shunt_in=True)
+
 source_match = mt.system_tools.network_cascade(shunt_source.network,phase_source.network)
 load_match = mt.system_tools.network_cascade(phase_load.network,shunt_load.network)
 
-amp = mt.system_tools.network_cascade(source_match,bjt)
-amp_total = mt.system_tools.network_cascade(amp,load_match)
+amp_total =  shunt_source.network ** phase_source.network **  bjt ** phase_load.network ** shunt_load.network
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 ##################plotting functions#######################
-plot.plot(amp_total.frequencies,amp_total.dbmag[1][0])
+plot.plot(amp_total.frequencies,amp_total.dbmag[1,0])
+plot.plot(bjt.frequencies,bjt.dbmag[1,0])
+#plot.plot(amp_total.frequencies,amp_total.dbmag[1,0])
+
 
 """
 smith = mt.plotting_tools.smith_chart()
