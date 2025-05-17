@@ -59,4 +59,13 @@ class smith_chart():
         self.ax.set_xlim([-1.1, 1.1])
         self.ax.set_ylim([-1.1, 1.1])
 
-    
+    def plot_complex(self,data):
+        real = np.real(data)
+        imag = np.imag(data)
+        self.ax.plot(real,imag)
+
+    def plot_circle(self,center,radius): 
+        if isinstance(center, np.complexfloating):
+            self.ax.add_patch(patches.Circle((np.real(center),np.imag(center)), radius, edgecolor='r', facecolor='none'))
+        elif isinstance(center, np.ndarray):
+            self.ax.add_patch(patches.Circle((center[0],center[1]), radius, edgecolor='r', facecolor='none'))

@@ -25,7 +25,7 @@ source_max_gain = 10*np.log10(np.interp(10E9,amp_calc.frequencies,amp_calc.sourc
 print(source_max_gain)
 
 sc,sr,min_gs= amp_calc.calc_gain_circle("source",source_max_gain-0.05,10E9)
-#lc,lr,min_gl= amp_calc.calc_gain_circle("load",match_gain/2,10E9)
+
 
 
 
@@ -37,7 +37,8 @@ gs_stub_l = (1/np.atan(mt.system_tools.gamma_2_impedance(50,np.abs(min_gs))/50))
 gs_phase_l = (np.angle(1/((1/50)+(1/(-1J*50*1/np.tan(2*np.pi*gs_stub_l)))))-np.angle(min_gs))/(2*np.pi) #calculating phasing line length using differences of phase
 
 
-
+shunt_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,gs_stub_l,freqs_in = freqs, typem="short", shunt_in=True, length_unit="lambda", center_freq = 10E9)
+phase_source = mt.t_line_tools.microstrip(50,4.4,1.6E-3,gs_phase_l,freqs_in = freqs, length_unit="lambda", center_freq= 10E9)
 
 
 
@@ -55,22 +56,21 @@ print("--- %s seconds ---" % (time.time() - start_time))
 ##################plotting functions#######################
 smith = mt.plotting_tools.smith_chart()
 
-real = np.real(amp_calc.source_max_gain_gamma)
-imag = np.imag(amp_calc.source_max_gain_gamma)
-smith.ax.plot(real,imag)
+smith.plot_complex(amp_calc.source_max_gain_gamma)
+smith.plot_circle(sc,sr)
 
 
-smith.ax.add_patch(patches.Circle((np.real(sc),np.imag(sc)), sr, edgecolor='r', facecolor='none'))
 
 
 #annotate every 1GHz
+"""
 point = 0
 for xy in zip(real, imag):  
     if bjt.frequencies[point]%1E9 == 0:
         smith.ax.annotate('(%s)' % (bjt.frequencies[point]/1E9), xy=xy, textcoords='data') 
         smith.ax.plot(real[point],imag[point], marker='o',markersize = 2 , c='black', linestyle='none')
     point = point + 1
-
+"""
 
 plot.grid()
 plot.show()

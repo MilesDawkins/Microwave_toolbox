@@ -14,7 +14,7 @@ file = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
 freqs = np.linspace(1E9, 10E9,1000)
 bjt = mt.system_tools.network(file)
 
-f0 = 6E9
+f0 = 2E9
 sl = 0.25
 pl = 0.25
 
