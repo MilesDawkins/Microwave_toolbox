@@ -1,7 +1,7 @@
 import numpy as np
 import cmath
 import os
-from . import system_tools as st
+from . import system_tools
 from . import plotting_tools
 
 
@@ -15,7 +15,7 @@ class rf_amplifier():
     https://www.allaboutcircuits.com/technical-articles/using-the-operating-power-gain-to-design-a-bilateral-rf-amplifier/
     "Microwave Transistor Amplifiers 2nd Edition" by Guillermo Gonzalez
     """
-    def __init__(self, s2p_in: st.network):
+    def __init__(self, s2p_in: system_tools.network):
         #initialize basic variables
         self.type = "Amplifier"
         self.sub_type = "None"
@@ -63,3 +63,70 @@ class rf_amplifier():
         gamma_l = np.interp(freq,self.frequencies,self.transistor.complex[1,1])
         load_imp = 50*((-1-gamma_l)/(gamma_l-1))
         return source_imp,load_imp
+    
+
+
+class attenuator():
+    def __init__(self,zo,attenuation,config = None,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "attenuator"
+        self.zo=zo
+        self.attenuation = attenuation
+
+        if  config != None:
+            self.config = config
+        else:
+            self.config = "pi"
+
+        
+        # calculate initial attenuator parameters
+        self.attenuator_calc()
+    
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+
+    def attenuator_calc(self):
+        if self.config == "pi":
+            self.shunt_r = self.zo*((10**(self.attenuation/20)+1)/(10**(self.attenuation/20)-1))
+            self.series_r = self.zo/2*((10**(self.attenuation/10)-1)/(10**(self.attenuation/20)))
+        elif self.config == "tee":
+            self.series_r = self.zo*((10**(self.attenuation/20)-1)/(10**(self.attenuation/20)+1))
+            self.shunt_r = 2*self.zo*((10**(self.attenuation/20))/(10**(self.attenuation/10)-1))
+
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+        series_y = 1/(self.series_r)
+        shunt_y = 1/(self.shunt_r)
+        
+        if self.config == "pi":
+
+            #A
+            self.network.file_data[0][0]=1+shunt_y/series_y
+
+            #B
+            self.network.file_data[0][1]=1/series_y
+
+            #C
+            self.network.file_data[1][0]=2*shunt_y+shunt_y**2/series_y
+
+            #D
+            self.network.file_data[1][1]=1+shunt_y/series_y
+        
+        elif self.config == "tee":
+
+            #A
+            self.network.file_data[0][0]=1+self.series_r/self.shunt_r
+
+            #B
+            self.network.file_data[0][1]=2*self.series_r+self.series_r**2/self.shunt_r
+
+            #C
+            self.network.file_data[1][0]=1/self.shunt_r
+
+            #D
+            self.network.file_data[1][1]=1+self.series_r/self.shunt_r
+
+        

@@ -23,7 +23,7 @@ lamb = microstrip_ref.wavelength(fo)
 max_gain = 10*np.log10(np.interp(fo,amp_calc.frequencies,amp_calc.max_transducer_gain))
 print(max_gain)
 
-
+att = mt.circuit_tools.attenuator(50,3,config = "pi",freqs_in = freqs)
 
 source_max_gain = 10*np.log10(np.interp(fo,amp_calc.frequencies,amp_calc.source_max_gain))
 print(source_max_gain)
@@ -44,7 +44,7 @@ print(gs_phase_l*lamb+0.5*lamb)
 
 source_match = shunt_source.network**phase_source.network
 
-amp = source_match ** bjt
+amp = source_match ** bjt ** att.network
 
 
 
