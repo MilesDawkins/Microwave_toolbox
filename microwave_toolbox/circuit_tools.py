@@ -129,4 +129,176 @@ class attenuator():
             #D
             self.network.file_data[1][1]=1+self.series_r/self.shunt_r
 
+
+
+
+
+
+
+class resistor():
+    def __init__(self,resistance,config = None,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "resistor"
+        self.resistance = resistance
+
+        if  config != None:
+            self.config = config
+        else:
+            self.config = "series"
+    
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+        
+        if self.config == "series":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=self.resistance
+
+            #C
+            self.network.file_data[1][0]=0
+
+            #D
+            self.network.file_data[1][1]=1
+        
+        elif self.config == "shunt":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=0
+
+            #C
+            self.network.file_data[1][0]=1/self.resistance
+
+            #D
+            self.network.file_data[1][1]=1
+
+
+class capacitor():
+    def __init__(self,capacitance,config = None,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "capacitor"
+        self.capacitance = capacitance
+
+        if  config != None:
+            self.config = config
+        else:
+            self.config = "series"
+    
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+        
+        if self.config == "series":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=-1j*1/(2*np.pi*freqs*self.capacitance)
+
+            #C
+            self.network.file_data[1][0]=0
+
+            #D
+            self.network.file_data[1][1]=1
+        
+        elif self.config == "shunt":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=0
+
+            #C
+            self.network.file_data[1][0]=1/(-1j*1/(2*np.pi*freqs*self.capacitance))
+
+            #D
+            self.network.file_data[1][1]=1
+
+
+class inductor():
+    def __init__(self,inductance,config = None,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "inductor"
+        self.inductance = inductance
+
+        if  config != None:
+            self.config = config
+        else:
+            self.config = "series"
+    
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+        
+        if self.config == "series":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=1j*2*np.pi*freqs*self.inductance
+
+            #C
+            self.network.file_data[1][0]=0
+
+            #D
+            self.network.file_data[1][1]=1
+        
+        elif self.config == "shunt":
+
+            #A
+            self.network.file_data[0][0]=1
+
+            #B
+            self.network.file_data[0][1]=0
+
+            #C
+            self.network.file_data[1][0]=1/(1j*2*np.pi*freqs*self.inductance)
+
+            #D
+            self.network.file_data[1][1]=1
+
+class transformer():
+    def __init__(self,ratio,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "inductor"
+        self.ratio = ratio
+
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
+
+        #A
+        self.network.file_data[0][0]=self.ratio
+
+        #B
+        self.network.file_data[0][1]=0
+
+        #C
+        self.network.file_data[1][0]=0
+
+        #D
+        self.network.file_data[1][1]=1/self.ratio
+        
+    
         
