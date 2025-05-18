@@ -23,8 +23,6 @@ lamb = microstrip_ref.wavelength(fo)
 max_gain = 10*np.log10(np.interp(fo,amp_calc.frequencies,amp_calc.max_transducer_gain))
 print(max_gain)
 
-att = mt.circuit_tools.attenuator(50,3,config = "pi",freqs_in = freqs)
-
 source_max_gain = 10*np.log10(np.interp(fo,amp_calc.frequencies,amp_calc.source_max_gain))
 print(source_max_gain)
 
@@ -42,9 +40,17 @@ print(gs_stub_l*lamb)
 print(gs_phase_l*lamb+0.5*lamb)
 
 
+cap = mt.circuit_tools.capacitor(1E-10,config = "series",freqs_in=freqs)
+ind = mt.circuit_tools.inductor(1E-9,config = "series",freqs_in=freqs)
+res = mt.circuit_tools.resistor(100,config = "shunt",freqs_in=freqs)
+trans = mt.circuit_tools.transformer(1.2,freqs_in=freqs)
+
+
 source_match = shunt_source.network**phase_source.network
 
-amp = source_match ** bjt ** att.network
+amp = trans.network **cap.network ** source_match ** bjt ** cap.network
+
+
 
 
 

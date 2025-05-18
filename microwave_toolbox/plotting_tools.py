@@ -62,7 +62,7 @@ class smith_chart():
     def plot_complex(self,data):
         real = np.real(data)
         imag = np.imag(data)
-        self.ax.plot(real,imag)
+        self.ax.plot(real,imag,marker='o',markersize = 2)
 
     def plot_circle(self,center,radius): 
         if isinstance(center, np.complexfloating):

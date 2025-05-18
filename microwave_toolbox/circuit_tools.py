@@ -104,30 +104,30 @@ class attenuator():
         if self.config == "pi":
 
             #A
-            self.network.file_data[0][0]=1+shunt_y/series_y
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))*(1+shunt_y/series_y)
 
             #B
-            self.network.file_data[0][1]=1/series_y
+            self.network.file_data[0][1]=np.ones(len(self.frequencies))*(1/series_y)
 
             #C
-            self.network.file_data[1][0]=2*shunt_y+shunt_y**2/series_y
+            self.network.file_data[1][0]=np.ones(len(self.frequencies))*(2*shunt_y+shunt_y**2/series_y)
 
             #D
-            self.network.file_data[1][1]=1+shunt_y/series_y
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))*(1+shunt_y/series_y)
         
         elif self.config == "tee":
 
             #A
-            self.network.file_data[0][0]=1+self.series_r/self.shunt_r
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))*(1+self.series_r/self.shunt_r)
 
             #B
-            self.network.file_data[0][1]=2*self.series_r+self.series_r**2/self.shunt_r
+            self.network.file_data[0][1]=np.ones(len(self.frequencies))*(2*self.series_r+self.series_r**2/self.shunt_r)
 
             #C
-            self.network.file_data[1][0]=1/self.shunt_r
+            self.network.file_data[1][0]=np.ones(len(self.frequencies))*(1/self.shunt_r)
 
             #D
-            self.network.file_data[1][1]=1+self.series_r/self.shunt_r
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))*(1+self.series_r/self.shunt_r)
 
 
 
@@ -156,30 +156,30 @@ class resistor():
         if self.config == "series":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
-            self.network.file_data[0][1]=self.resistance
+            self.network.file_data[0][1]=np.ones(len(self.frequencies))*self.resistance
 
             #C
-            self.network.file_data[1][0]=0
+            self.network.file_data[1][0]=np.zeros(len(self.frequencies))
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
         
         elif self.config == "shunt":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
-            self.network.file_data[0][1]=0
+            self.network.file_data[0][1]=np.zeros(len(self.frequencies))
 
             #C
-            self.network.file_data[1][0]=1/self.resistance
+            self.network.file_data[1][0]=np.ones(len(self.frequencies))*(1/self.resistance)
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
 
 
 class capacitor():
@@ -203,30 +203,30 @@ class capacitor():
         if self.config == "series":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
             self.network.file_data[0][1]=-1j*1/(2*np.pi*freqs*self.capacitance)
 
             #C
-            self.network.file_data[1][0]=0
+            self.network.file_data[1][0]=np.zeros(len(self.frequencies))
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
         
         elif self.config == "shunt":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
-            self.network.file_data[0][1]=0
+            self.network.file_data[0][1]=np.zeros(len(self.frequencies))
 
             #C
             self.network.file_data[1][0]=1/(-1j*1/(2*np.pi*freqs*self.capacitance))
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
 
 
 class inductor():
@@ -250,30 +250,30 @@ class inductor():
         if self.config == "series":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
             self.network.file_data[0][1]=1j*2*np.pi*freqs*self.inductance
 
             #C
-            self.network.file_data[1][0]=0
+            self.network.file_data[1][0]=np.zeros(len(self.frequencies))
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
         
         elif self.config == "shunt":
 
             #A
-            self.network.file_data[0][0]=1
+            self.network.file_data[0][0]=np.ones(len(self.frequencies))
 
             #B
-            self.network.file_data[0][1]=0
+            self.network.file_data[0][1]=np.zeros(len(self.frequencies))
 
             #C
             self.network.file_data[1][0]=1/(1j*2*np.pi*freqs*self.inductance)
 
             #D
-            self.network.file_data[1][1]=1
+            self.network.file_data[1][1]=np.ones(len(self.frequencies))
 
 class transformer():
     def __init__(self,ratio,freqs_in = None):
@@ -289,16 +289,33 @@ class transformer():
         self.network = system_tools.network(num_ports=2,frequencies=freqs,format='ABCD')
 
         #A
-        self.network.file_data[0][0]=self.ratio
+        self.network.file_data[0][0]=np.ones(len(self.frequencies))*self.ratio
 
         #B
-        self.network.file_data[0][1]=0
+        self.network.file_data[0][1]=np.zeros(len(self.frequencies))
 
         #C
-        self.network.file_data[1][0]=0
+        self.network.file_data[1][0]=np.zeros(len(self.frequencies))
 
         #D
-        self.network.file_data[1][1]=1/self.ratio
+        self.network.file_data[1][1]=np.ones(len(self.frequencies))*(1/self.ratio)
+
+class termination():
+    def __init__(self,zo,freqs_in = None):
+        # create class instance globals
+        self.sub_type = "termination"
+        self.zo = zo
+
+        if freqs_in is not None:
+            self.frequencies = freqs_in
+            self.create_network(freqs_in)
+
+    def create_network(self,freqs):
+        self.network = system_tools.network(num_ports=1,frequencies=freqs,format='MA')
+        gamma_in = np.ones(len(self.frequencies))*((self.zo-50)/(self.zo+50))
+        
+        #s11
+        self.network.file_data=np.abs(gamma_in) + 1j*((180/np.pi)*np.angle(gamma_in))
         
     
         
