@@ -77,6 +77,8 @@ class network():
             self.impedance = self.calc_input_impedance()
         if attr=="abcd":
             self.abcd = self.calc_abcd()
+        if attr=="abcd":
+            self.y = self.calc_y()
         return super(network, self).__getattribute__(attr)
 
     def read_snp(self,file_path):
@@ -238,9 +240,13 @@ class network():
         if self.num_ports != 1:
 
             if self.format != "ABCD":
+
                 temp[0,0]=(((1+self.complex[0,0])*(1-self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+
                 temp[0,1]=(self.z_reference*((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+
                 temp[1,0]=((1/self.z_reference)*((1-self.complex[0,0])*(1-self.complex[1,1])-(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
+
                 temp[1,1]=(((1-self.complex[0,0])*(1+self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/(2*self.complex[1,0]))
 
             else:
@@ -270,8 +276,36 @@ class network():
             
         return temp
     
+    def calc_y(self):
+        #currently relies on complex data being available
+        temp = np.empty((self.num_ports,self.num_ports,len(self.frequencies)),dtype = "complex")
+
+        if self.num_ports != 1:
+                
+                temp[0,0]=(1/self.z_reference)*(((1-self.complex[0,0])*(1+self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0])))
+
+                temp[0,1]=(1/self.z_reference)*((-2*self.complex[0,1])/((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0])))
+
+                temp[1,0]=(1/self.z_reference)*((-2*self.complex[1,0])/((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0])))
+
+                temp[1,1]=(1/self.z_reference)*(((1+self.complex[0,0])*(1-self.complex[1,1])+(self.complex[0,1]*self.complex[1,0]))/((1+self.complex[0,0])*(1+self.complex[1,1])-(self.complex[0,1]*self.complex[1,0])))
+
+        else:
+            temp=1/self.impedance
+        
+        return temp
+    
     def __pow__(self, other):
         return network_cascade(self,other)
+
+
+
+
+
+
+
+
+
 
 def reverse_network(s1: network):
    temp1 =  s1.file_data[0][0]
