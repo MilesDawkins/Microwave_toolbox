@@ -48,7 +48,7 @@ trans = mt.circuit_tools.transformer(4,freqs_in=freqs)
 
 source_match = shunt_source.network**phase_source.network
 
-amp =  cap.network ** ind.network **  bjt ** res.network  ** cap.network 
+amp =  trans **  bjt ** res.network  ** cap.network 
 
 
 
@@ -64,7 +64,7 @@ plot.legend(["s22","s11","s21","s12"])
 plot.grid()
 
 smith = mt.plotting_tools.smith_chart()
-smith.plot_complex(amp_calc.source_max_gain_gamma[0:int(len(amp_calc.source_max_gain_gamma))])
+smith.plot_complex(amp.complex[0,0])
 smith.plot_complex(source_match.complex[1,1,0:int(len(source_match.complex[1,1])/2)])
 smith.plot_circle(sc,sr)
 
