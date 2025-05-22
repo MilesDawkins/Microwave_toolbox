@@ -77,7 +77,7 @@ class network():
             self.impedance = self.calc_input_impedance()
         if attr=="abcd":
             self.abcd = self.calc_abcd()
-        if attr=="abcd":
+        if attr=="y":
             self.y = self.calc_y()
         return super(network, self).__getattribute__(attr)
 

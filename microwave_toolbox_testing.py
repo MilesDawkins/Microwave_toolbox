@@ -8,7 +8,15 @@ import time
 ##############setup functions####################
 start_time = time.time()
 script_directory = os.path.dirname(os.path.abspath(__file__))
-file1 = os.path.join(script_directory,"BFP840FESD_VCE_2.0V_IC_22mA.s2p")
-file2 = os.path.join(script_directory,"BFCN-1560+___Plus25degC.s2p")
+file1 = os.path.join(script_directory,"diy_open2.s1p")
+file2 = os.path.join(script_directory,"diy_short_solder2.s1p")
 
 #################calulation functions###########################
+open = mt.system_tools.network(file1)
+short = mt.system_tools.network(file2)
+
+open_coeff,open_delay = mt.vna_tools.custom_cal_kit_polynomial_calc(open,type = "open")
+short_coeff,short_delay = mt.vna_tools.custom_cal_kit_polynomial_calc(short,type = "short")
+
+print(open_coeff,open_delay)
+print(short_coeff,short_delay)
