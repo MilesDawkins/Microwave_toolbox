@@ -8,9 +8,9 @@ import time
 ##############setup functions####################
 start_time = time.time()
 script_directory = os.path.dirname(os.path.abspath(__file__))
-file1 = os.path.join(script_directory,"diy_open2_filtered_12GHz.s1p")
-file2 = os.path.join(script_directory,"diy_short_solder2.s1p")
-file3 = os.path.join(script_directory,"diy_load2.s1p")
+file1 = os.path.join(script_directory,"open_n_type.s1p")
+file2 = os.path.join(script_directory,"short_n_type.s1p")
+file3 = os.path.join(script_directory,"load_n_type.s1p")
 
 #################calulation functions###########################
 open = mt.system_tools.network(file1)
