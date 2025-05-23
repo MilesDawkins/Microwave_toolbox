@@ -7,43 +7,69 @@ from . import system_tools as st
 def custom_cal_kit_polynomial_calc(net: st.network, type=None):
     # OPEN CALCULATIONS
     if type == "open":
-        # Convert to Y-parameters and extract imaginary part of Y11
-        c = np.imag(net.y[0, 0]) / (2 * np.pi * np.array(net.frequencies))  # Capacitance
-        # Fit 3rd-order polynomial to C(f)
-        p = Polynomial.fit(np.array(net.frequencies), c, 3)
+        s11 = net.complex[0, 0]
+        freqs = np.array(net.frequencies)
+        
 
-        # Delay extraction via phase slope
-        freqs_Hz = np.array(net.frequencies)
-        freqs_GHz = freqs_Hz / 1e9
-        phase_rad = np.unwrap(np.angle(net.complex[0, 0]))
-        dphi_df = np.gradient(phase_rad, freqs_Hz)
-        delay_s = -dphi_df / (4 * np.pi)  # round-trip delay
-        delay_ps = delay_s * 1e12
-        avg_delay_ps = np.mean(delay_ps)
-
-        # Polynomial coefficients
-        coeffs = p.convert().coef
-        return coeffs, avg_delay_ps
-
-    # SHORT CALCULATIONS
-    elif type == "short":
-        # Convert to Z-parameters and extract imaginary part of Z11
-        l = np.imag(net.impedance[0, 0]) / (2 * np.pi * np.array(net.frequencies))  # Inductance
-        # Fit 3rd-order polynomial to L(f)
-        p = Polynomial.fit(np.array(net.frequencies), l, 3)
-
-        # Delay extraction via phase slope
-        freqs_Hz = np.array(net.frequencies)
-        freqs_GHz = freqs_Hz / 1e9
-        phase_rad = np.unwrap(np.angle(net.complex[0, 0]))
-        dphi_df = np.gradient(phase_rad, freqs_Hz)
+        # Calculate delay from unwrapped S11 phase
+        phase_rad = np.unwrap(np.angle(s11))
+        dphi_df = np.gradient(phase_rad, freqs)
         delay_s = -dphi_df / (4 * np.pi)
         delay_ps = delay_s * 1e12
         avg_delay_ps = np.mean(delay_ps)
 
-        # Polynomial coefficients
+        # De-embed delay from S11
+        tau = avg_delay_ps * 1e-12  # delay in seconds
+        s11_corr = s11 * np.exp(1j * 2 * np.pi * freqs * tau)
+
+        # Convert to Y11
+        Z0 = 50
+        gamma = s11_corr
+        Y11 = (1 - gamma) / (1 + gamma) / Z0
+
+        # Calculate C(f) from imag(Y11)
+        omega = 2 * np.pi * freqs
+        C = np.imag(Y11) / omega
+
+        # Fit 3rd-order polynomial to C(f)
+        p = Polynomial.fit(freqs, C, 3)
+
         coeffs = p.convert().coef
         return coeffs, avg_delay_ps
+
+
+    # SHORT CALCULATIONS
+    elif type == "short":
+        s11 = net.complex[0, 0]
+        freqs = np.array(net.frequencies)
+        
+
+        # Calculate delay from unwrapped S11 phase
+        phase_rad = np.unwrap(np.angle(s11))
+        dphi_df = np.gradient(phase_rad, freqs)
+        delay_s = -dphi_df / (4 * np.pi)
+        delay_ps = delay_s * 1e12
+        avg_delay_ps = np.mean(delay_ps)
+
+        # De-embed delay from S11
+        tau = avg_delay_ps * 1e-12
+        s11_corr = s11 * np.exp(1j * 2 * np.pi * freqs * tau)
+
+        # Convert to Z11
+        Z0 = 50
+        gamma = s11_corr
+        Z11 = Z0 * (1 + gamma) / (1 - gamma)
+
+        # Calculate L(f) from imag(Z11)
+        omega = 2 * np.pi * freqs
+        L = np.imag(Z11) / omega
+
+        # Fit 3rd-order polynomial to L(f)
+        p = Polynomial.fit(freqs, L, 3)
+
+        coeffs = p.convert().coef
+        return coeffs, avg_delay_ps
+
 
     # LOAD CALCULATIONS
     elif type == "load":
