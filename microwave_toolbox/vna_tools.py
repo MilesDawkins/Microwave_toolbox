@@ -108,5 +108,45 @@ def custom_cal_kit_polynomial_calc(net: st.network, type=None):
 
         return  Z_offset, avg_delay_ps
 
+
+        # OPEN CALCULATIONS
+    if type == "new_open":
+        s11 = net.complex[0, 0]
+        freqs = np.array(net.frequencies)
+        
+
+        # Calculate delay from unwrapped S11 phase
+        phase_rad = np.unwrap(np.angle(s11))
+        dphi_df = np.gradient(phase_rad, freqs)
+        delay_s = -dphi_df / (4 * np.pi)
+        delay_ps = delay_s * 1e12
+        avg_delay_ps = np.mean(delay_ps)
+
+        # De-embed delay from S11
+        tau = avg_delay_ps * 1e-12  # delay in seconds
+        s11_pol_mag = np.abs(net.complex[0,0])
+        s11_pol_phase = np.angle(net.complex[0,0])
+        corrected_s11_phase = s11_pol_phase + (1j * 2 * np.pi * freqs * tau)
+
+        real_parts = s11_pol_mag * np.cos(corrected_s11_phase)
+        imag_parts = s11_pol_mag * np.sin(corrected_s11_phase)
+        
+        s11_corr = real_parts + 1j * imag_parts
+        
+        # Convert to Y11
+        Z0 = 50
+        gamma = s11_corr
+        Y11 = (1 - gamma) / (1 + gamma) / Z0
+
+        # Calculate C(f) from imag(Y11)
+        omega = 2 * np.pi * freqs
+        C = np.imag(Y11) / omega
+
+        # Fit 3rd-order polynomial to C(f)
+        p = Polynomial.fit(freqs, C, 3)
+
+        coeffs = p.convert().coef
+        return coeffs, avg_delay_ps
+
     else:
         raise ValueError("type must be one of: 'open', 'short', or 'load'")
